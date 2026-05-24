@@ -118,6 +118,16 @@ public fun assert_not_paused(agent: &ANIMA) {
     assert!(!agent.is_paused, EAgentIsPaused);
 }
 
+/// Grants read-only access to the reputation score
+public fun reputation_score(agent: &ANIMA): u64 {
+    agent.reputation_score
+}
+
+/// Grants read-only access to the is_paused status
+public fun is_paused(agent: &ANIMA): bool {
+    agent.is_paused
+}
+
 /// Grants access to read the internal identifier context
 public fun borrow_uid_mut(agent: &mut ANIMA): &mut UID {
     &mut agent.id
