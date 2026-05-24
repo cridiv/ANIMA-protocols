@@ -1,7 +1,7 @@
 #[test_only]
 module anima::anima_tests;
 
-use anima::protocol::{Self, ANIMA, OwnerCap};
+use anima::protocol::{Self, ANIMA, OwnerCap, BackendCap};
 use anima::skill_registry;
 use anima::wallet;
 use std::string;
@@ -15,23 +15,23 @@ const GUARDIAN_ADDR: address = @0xA11CE;
 const BACKEND_ADDR: address = @0xB0B;
 const MALICIOUS_ADDR: address = @0xBAD;
 
-fun setup_test(): (Scenario, ANIMA, OwnerCap) {
+fun setup_test(): (Scenario, ANIMA, OwnerCap, BackendCap) {
     let mut scenario = test_scenario::begin(GUARDIAN_ADDR);
 
     // 1. Execute the initial agent container initialization block
-    let (agent, cap) = protocol::mint_agent(
+    let (agent, cap, backend_cap) = protocol::mint_agent(
         string::utf8(b"Anima_Cortex_v1"),
         test_scenario::ctx(&mut scenario),
     );
 
-    (scenario, agent, cap)
+    (scenario, agent, cap, backend_cap)
 }
 
 // --- Test Suites ---
 
 #[test]
 fun test_initialization_flow() {
-    let (scenario, agent, cap) = setup_test();
+    let (scenario, agent, cap, backend_cap) = setup_test();
 
     // Assert structural state records are initialized cleanly
     assert!(!protocol::is_paused(&agent), 0);
@@ -40,12 +40,13 @@ fun test_initialization_flow() {
     // Clean up test objects
     std::unit_test::destroy(agent);
     std::unit_test::destroy(cap);
+    std::unit_test::destroy(backend_cap);
     test_scenario::end(scenario);
 }
 
 #[test]
 fun test_deposit_and_settlement_loops() {
-    let (mut scenario, mut agent, cap) = setup_test();
+    let (mut scenario, mut agent, cap, backend_cap) = setup_test();
 
     // 1. Emulate depositing 500 SUI into the container balance
     let test_mint_ctx = test_scenario::ctx(&mut scenario);
@@ -60,6 +61,7 @@ fun test_deposit_and_settlement_loops() {
     test_scenario::next_tx(&mut scenario, BACKEND_ADDR);
     protocol::settle_compute_costs(
         &mut agent,
+        &backend_cap,
         50,
         BACKEND_ADDR,
         test_scenario::ctx(&mut scenario),
@@ -71,12 +73,13 @@ fun test_deposit_and_settlement_loops() {
 
     std::unit_test::destroy(agent);
     std::unit_test::destroy(cap);
+    std::unit_test::destroy(backend_cap);
     test_scenario::end(scenario);
 }
 
 #[test]
 fun test_dynamic_field_skill_registry() {
-    let (mut scenario, mut agent, cap) = setup_test();
+    let (mut scenario, mut agent, cap, backend_cap) = setup_test();
 
     let skill_name = string::utf8(b"DeepBook_Arb_Core");
     let blob_id = string::utf8(b"walrus_blob_hash_0x8821a");
@@ -97,12 +100,13 @@ fun test_dynamic_field_skill_registry() {
 
     std::unit_test::destroy(agent);
     std::unit_test::destroy(cap);
+    std::unit_test::destroy(backend_cap);
     test_scenario::end(scenario);
 }
 
 #[test]
 fun test_emergency_kill_switch_hatch() {
-    let (mut scenario, mut agent, cap) = setup_test();
+    let (mut scenario, mut agent, cap, backend_cap) = setup_test();
 
     // 1. Seed the internal sovereign balance with tokens
     let funding_tokens = coin::mint_for_testing<SUI>(1000, test_scenario::ctx(&mut scenario));
@@ -121,13 +125,14 @@ fun test_emergency_kill_switch_hatch() {
 
     std::unit_test::destroy(agent);
     std::unit_test::destroy(cap);
+    std::unit_test::destroy(backend_cap);
     test_scenario::end(scenario);
 }
 
 #[test]
 #[expected_failure(abort_code = anima::protocol::EAgentIsPaused)]
 fun test_post_kill_switch_spend_refusal() {
-    let (mut scenario, mut agent, cap) = setup_test();
+    let (mut scenario, mut agent, cap, backend_cap) = setup_test();
 
     // 1. Execute kill switch execution block
     protocol::trigger_emergency_kill(&mut agent, &cap, test_scenario::ctx(&mut scenario));
@@ -143,5 +148,6 @@ fun test_post_kill_switch_spend_refusal() {
     std::unit_test::destroy(spending_coin);
     std::unit_test::destroy(agent);
     std::unit_test::destroy(cap);
+    std::unit_test::destroy(backend_cap);
     test_scenario::end(scenario);
 }

@@ -2,6 +2,7 @@ module anima::events;
 
 use sui::coin::{Self, Coin};
 use sui::event;
+use sui::object::ID;
 use sui::sui::SUI;
 
 // --- Structural Verification Events ---

@@ -26,11 +26,17 @@ public struct OwnerCap has key, store {
     anima_id: ID,
 }
 
+/// Capability given to the off-chain execution backend for compute fee settlement
+public struct BackendCap has key, store {
+    id: UID,
+    anima_id: ID,
+}
+
 // --- Public Executions ---
 
 /// Primary entry point: Instantiates an agent identity, configures an empty internal vault,
 /// and delivers the remote control access capability to the user's wallet address.
-public fun mint_agent(name: String, ctx: &mut TxContext): (ANIMA, OwnerCap) {
+public fun mint_agent(name: String, ctx: &mut TxContext): (ANIMA, OwnerCap, BackendCap) {
     let sender = tx_context::sender(ctx);
     let id = object::new(ctx);
     let anima_id = object::uid_to_inner(&id);
@@ -48,9 +54,14 @@ public fun mint_agent(name: String, ctx: &mut TxContext): (ANIMA, OwnerCap) {
         anima_id,
     };
 
+    let backend_cap = BackendCap {
+        id: object::new(ctx),
+        anima_id,
+    };
+
     events::emit_anima_minted(anima_id, sender);
 
-    (agent, cap)
+    (agent, cap, backend_cap)
 }
 
 /// Emergency Control Pattern: Instantly halts all autonomous routing operations
@@ -70,14 +81,16 @@ public fun trigger_emergency_kill(agent: &mut ANIMA, cap: &OwnerCap, ctx: &mut T
     events::emit_emergency_hatch(cap.anima_id, sender, total_assets);
 }
 
-/// V1 Off-Chain Compute Cost Settlement Mechanism
+/// V1 Off-Chain Compute Cost Settlement Mechanism. Only the authorized Backend can execute this.
 public fun settle_compute_costs(
     agent: &mut ANIMA,
+    cap: &BackendCap,
     amount: u64,
     recipient: address,
     ctx: &mut TxContext,
 ) {
     assert!(!agent.is_paused, EAgentIsPaused);
+    assert!(object::uid_to_inner(&agent.id) == cap.anima_id, EInvalidGuardianCertificate);
     assert!(balance::value(&agent.wallet_balance) >= amount, EInsufficientFunds);
 
     let payment = coin::take(&mut agent.wallet_balance, amount, ctx);
@@ -106,6 +119,12 @@ public fun is_paused(agent: &ANIMA): bool {
 /// Package-internal utility for incrementing reputation score
 public fun increment_reputation(agent: &mut ANIMA) {
     agent.reputation_score = agent.reputation_score + 1;
+}
+
+/// Primary action recording: Increments agent reputation score and emits the related action event
+public fun record_action(agent: &mut ANIMA, swap_result: &sui::coin::Coin<SUI>) {
+    increment_reputation(agent);
+    events::emit_action(object::uid_to_inner(&agent.id), swap_result);
 }
 
 /// Grants access to read the internal identifier context
