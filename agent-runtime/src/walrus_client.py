@@ -65,7 +65,7 @@ class WalrusClient:
         """
         try:
             skill_json = skill.to_json()
-            logger.info(f"📤 Uploading skill '{skill.skill_name}' to Walrus...")
+            logger.info(f" Uploading skill '{skill.skill_name}' to Walrus...")
             
             # In production, this would use the actual Walrus API
             # For now, we'll use a mock implementation
@@ -82,14 +82,14 @@ class WalrusClient:
                 "size_bytes": len(skill_json)
             }
             
-            logger.info(f"✅ Skill uploaded successfully!")
+            logger.info(f" Skill uploaded successfully!")
             logger.info(f"   Blob ID: {blob_id}")
             logger.info(f"   Size: {len(skill_json)} bytes")
             
             return blob_id
             
         except Exception as e:
-            logger.error(f"❌ Failed to upload skill: {e}")
+            logger.error(f" Failed to upload skill: {e}")
             return None
     
     async def retrieve_skill(self, blob_id: str) -> Optional[SkillConfig]:
@@ -135,13 +135,13 @@ class WalrusClient:
                 }
             )
             
-            logger.info(f"✅ Skill retrieved successfully!")
+            logger.info(f" Skill retrieved successfully!")
             logger.info(f"   Skill: {skill.skill_name} v{skill.version}")
             
             return skill
             
         except Exception as e:
-            logger.error(f"❌ Failed to retrieve skill: {e}")
+            logger.error(f"Failed to retrieve skill: {e}")
             return None
     
     async def verify_blob_integrity(self, blob_id: str, expected_hash: Optional[str] = None) -> bool:
@@ -168,11 +168,11 @@ class WalrusClient:
             assert hasattr(skill, 'action'), "Missing action"
             assert hasattr(skill, 'risk_limits'), "Missing risk_limits"
             
-            logger.info(f"✅ Integrity check passed for blob {blob_id[:8]}...")
+            logger.info(f"Integrity check passed for blob {blob_id[:8]}...")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Integrity check failed: {e}")
+            logger.error(f"Integrity check failed: {e}")
             return False
 
 
@@ -189,7 +189,7 @@ class WalrusRoundTripTest:
         client = WalrusClient()
         
         # Test 1: Create and upload skill
-        logger.info("\n📋 Test 1: Upload Skill Config")
+        logger.info("\n Test 1: Upload Skill Config")
         skill = SkillConfig(
             skill_name="token_price_monitor",
             version="1.0",
@@ -213,21 +213,21 @@ class WalrusRoundTripTest:
         
         blob_id = await client.upload_skill(skill)
         if not blob_id:
-            logger.error("❌ Upload failed!")
+            logger.error(" Upload failed!")
             return False
         
         # Test 2: Retrieve skill
-        logger.info("\n📋 Test 2: Retrieve Skill Config")
+        logger.info("\n Test 2: Retrieve Skill Config")
         retrieved_skill = await client.retrieve_skill(blob_id)
         if not retrieved_skill:
-            logger.error("❌ Retrieval failed!")
+            logger.error(" Retrieval failed!")
             return False
         
         # Test 3: Verify integrity
-        logger.info("\n📋 Test 3: Verify Integrity")
+        logger.info("\n Test 3: Verify Integrity")
         is_valid = await client.verify_blob_integrity(blob_id)
         if not is_valid:
-            logger.error("❌ Integrity check failed!")
+            logger.error(" Integrity check failed!")
             return False
         
         # Test 4: Compare original vs retrieved
@@ -236,19 +236,19 @@ class WalrusRoundTripTest:
         retrieved_json = retrieved_skill.to_json()
         
         if skill.skill_name == retrieved_skill.skill_name:
-            logger.info(f"✅ Skill name matches: {skill.skill_name}")
+            logger.info(f" Skill name matches: {skill.skill_name}")
         else:
-            logger.error("❌ Skill name mismatch!")
+            logger.error(" Skill name mismatch!")
             return False
         
         if skill.version == retrieved_skill.version:
-            logger.info(f"✅ Version matches: {skill.version}")
+            logger.info(f" Version matches: {skill.version}")
         else:
-            logger.error("❌ Version mismatch!")
+            logger.error(" Version mismatch!")
             return False
         
         logger.info("\n" + "="*60)
-        logger.info("✅ ALL TESTS PASSED!")
+        logger.info(" ALL TESTS PASSED!")
         logger.info("="*60 + "\n")
         
         return True
