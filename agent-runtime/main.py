@@ -27,17 +27,17 @@ async def main():
     
     try:
         # Start price monitoring
-        logger.info("\n📊 Starting price monitoring loop...")
+        logger.info("\n Starting price monitoring loop...")
         logger.info("Press Ctrl+C to stop\n")
         await price_monitor.start()
         
     except KeyboardInterrupt:
-        logger.info("\n\n✋ Shutdown signal received")
+        logger.info("\n\n Shutdown signal received")
         price_monitor.stop()
     except Exception as e:
-        logger.error(f"❌ Runtime error: {e}", exc_info=True)
+        logger.error(f" Runtime error: {e}", exc_info=True)
     finally:
-        logger.info("✅ Runtime shutdown complete")
+        logger.info(" Runtime shutdown complete")
 
 
 if __name__ == "__main__":
