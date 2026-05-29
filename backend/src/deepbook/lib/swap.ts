@@ -1,5 +1,4 @@
-import { Transaction, TransactionResult } from '@mysten/sui/transactions';
-import { DeepBookClient } from '@mysten/deepbook-v3';
+import { Transaction } from '@mysten/sui/transactions';
 
 export interface SwapParams {
   poolId: string;
@@ -21,21 +20,21 @@ export interface SwapParams {
  */
 export function buildDeepBookSwap(
   tx: Transaction,
-  deepBook: DeepBookClient,
+  deepBookTransactor: any,
   params: SwapParams
-): TransactionResult {
+): any {
   const isBaseToQuote = params.fromToken === 'SUI';
   const deepAmount = params.deepAmountIn ?? 0n; // Default to 0 DEEP for fees if not provided
 
   if (isBaseToQuote) {
-    return deepBook.swapExactBaseForQuote({
+    return deepBookTransactor.swapExactBaseForQuote({
       poolKey: params.poolId, // Expected to be the pool key (e.g. 'SUI_DBUSDC')
       amount: params.amountIn,
       deepAmount: deepAmount,
       minOut: params.minAmountOut,
     })(tx);
   } else {
-    return deepBook.swapExactQuoteForBase({
+    return deepBookTransactor.swapExactQuoteForBase({
       poolKey: params.poolId,
       amount: params.amountIn,
       deepAmount: deepAmount,
@@ -57,7 +56,7 @@ export interface TransferParams {
 export function buildFallbackTransfer(
   tx: Transaction,
   params: TransferParams
-): TransactionResult {
+): any {
   console.log('[PTB] Using fallback transfer — DeepBook unavailable');
   
   // Split the exact amount of SUI from gas
