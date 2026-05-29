@@ -48,8 +48,8 @@ def check_imports():
     print("-" * 50)
     
     modules_to_check = [
-        ("monitor", "PriceMonitor"),
-        ("walrus_client", "WalrusClient, SkillConfig"),
+        ("src.monitor", "PriceMonitor"),
+        ("src.walrus_client", "WalrusClient, SkillConfig"),
     ]
     
     all_ok = True
@@ -70,7 +70,7 @@ async def check_api_connectivity():
     print("-" * 50)
     
     try:
-        from monitor import PriceMonitor
+        from src.monitor import PriceMonitor
         monitor = PriceMonitor(poll_interval=30)
         
         print("  Testing CoinGecko API...")
@@ -94,7 +94,7 @@ async def check_walrus_roundtrip():
     print("-" * 50)
     
     try:
-        from walrus_client import WalrusRoundTripTest
+        from src.walrus_client import WalrusRoundTripTest
         result = await WalrusRoundTripTest.run()
         return result
     except Exception as e:
