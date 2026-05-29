@@ -2,8 +2,8 @@ import asyncio
 import logging
 import os
 from dotenv import load_dotenv
-from monitor import PriceMonitor
-from walrus_client import WalrusClient
+from src.monitor import PriceMonitor
+from src.walrus_client import WalrusClient
 
 # Load environment variables
 load_dotenv()

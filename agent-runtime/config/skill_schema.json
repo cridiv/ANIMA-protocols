@@ -1,0 +1,38 @@
+{
+  "skill_name": "token_price_monitor",
+  "description": "Monitors a token price and triggers a swap action when price crosses threshold",
+  "version": "1.0",
+  "author": "ANIMA Agent Runtime",
+  "trigger": {
+    "type": "price_threshold",
+    "token": "SUI",
+    "condition": "below",
+    "value": 0.4,
+    "description": "Fire action when SUI price drops below $0.40"
+  },
+  "action": {
+    "type": "swap",
+    "from_token": "USDC",
+    "to_token": "SUI",
+    "amount_percentage": 10,
+    "description": "Swap 10% of USDC balance for SUI when trigger fires"
+  },
+  "risk_limits": {
+    "max_spend_per_action": 10.0,
+    "daily_spend_cap": 50.0,
+    "max_slippage_percent": 1.0,
+    "description": "Safety limits to prevent excessive spending or bad trades"
+  },
+  "execution_context": {
+    "blockchain": "sui",
+    "network": "testnet",
+    "dex": "deepbook_v3",
+    "settlement_layer": "sui_ptb"
+  },
+  "metadata": {
+    "created_at": "2026-05-29T00:00:00Z",
+    "updated_at": "2026-05-29T00:00:00Z",
+    "status": "active",
+    "training_data_version": "v1.0"
+  }
+}
