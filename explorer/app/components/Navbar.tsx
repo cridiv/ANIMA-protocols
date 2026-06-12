@@ -66,7 +66,7 @@ const Navbar = () => {
         </div>
 
         {/* Validators Link */}
-        <a className="rounded px-3 py-2 hover:text-brand" href="/nfa">
+        <a className="rounded px-3 py-2 hover:text-brand" href="/agents">
           Agents {`(NFAs)`}
         </a>
 
@@ -102,7 +102,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="absolute top-[72px] left-0 right-0 bg-page md:hidden border-b shadow-lg">
+        <div className="absolute top-[72px] left-0 right-0 bg-background md:hidden border-b shadow-lg">
           <nav className="flex flex-col px-4 py-4 gap-y-2">
             <button
               onClick={() => setIsBlockchainOpen(!isBlockchainOpen)}
@@ -112,7 +112,7 @@ const Navbar = () => {
             </button>
             <a
               className="rounded px-3 py-2 hover:text-brand text-sm block"
-              href="/nfa"
+              href="/agents"
             >
               Agents {`(NFAs)`}
             </a>
