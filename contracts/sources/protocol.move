@@ -15,6 +15,7 @@ const EInsufficientFunds: u64 = 3;
 public struct ANIMA has key, store {
     id: UID,
     name: String,
+    operator_address: address,
     reputation_score: u64,
     is_paused: bool,
     wallet_balance: Balance<SUI>,
@@ -36,7 +37,7 @@ public struct BackendCap has key, store {
 
 /// Primary entry point: Instantiates an agent identity, configures an empty internal vault,
 /// and delivers the remote control access capability to the user's wallet address.
-public fun mint_agent(name: String, ctx: &mut TxContext): (ANIMA, OwnerCap, BackendCap) {
+public fun mint_agent(name: String, operator_address: address, ctx: &mut TxContext): (ANIMA, OwnerCap, BackendCap) {
     let sender = tx_context::sender(ctx);
     let id = object::new(ctx);
     let anima_id = object::uid_to_inner(&id);
@@ -44,6 +45,7 @@ public fun mint_agent(name: String, ctx: &mut TxContext): (ANIMA, OwnerCap, Back
     let agent = ANIMA {
         id,
         name,
+        operator_address,
         reputation_score: 100, // Starts pristine
         is_paused: false,
         wallet_balance: balance::zero<SUI>(),
@@ -71,8 +73,8 @@ public fun trigger_emergency_kill(agent: &mut ANIMA, cap: &OwnerCap, ctx: &mut T
     assert!(object::uid_to_inner(&agent.id) == cap.anima_id, EInvalidGuardianCertificate);
 
     agent.is_paused = true;
-    let sender = tx_context::sender(ctx);
-    let total_assets = balance::value(&agent.wallet_balance);
+    let sender = ctx.sender();
+    let total_assets = agent.wallet_balance.value();
 
     // Take everything out of the agent vault
     let remaining_funds = coin::take(&mut agent.wallet_balance, total_assets, ctx);
@@ -91,7 +93,7 @@ public fun settle_compute_costs(
 ) {
     assert!(!agent.is_paused, EAgentIsPaused);
     assert!(object::uid_to_inner(&agent.id) == cap.anima_id, EInvalidGuardianCertificate);
-    assert!(balance::value(&agent.wallet_balance) >= amount, EInsufficientFunds);
+    assert!(agent.wallet_balance.value() >= amount, EInsufficientFunds);
 
     let payment = coin::take(&mut agent.wallet_balance, amount, ctx);
     sui::transfer::public_transfer(payment, recipient);
@@ -116,19 +118,24 @@ public fun is_paused(agent: &ANIMA): bool {
     agent.is_paused
 }
 
+/// Grants read-only access to the bound hot-wallet operator address
+public fun operator_address(agent: &ANIMA): address {
+    agent.operator_address
+}
+
 /// Package-internal utility for incrementing reputation score
-public fun increment_reputation(agent: &mut ANIMA) {
+public(package) fun increment_reputation(agent: &mut ANIMA) {
     agent.reputation_score = agent.reputation_score + 1;
 }
 
 /// Primary action recording: Increments agent reputation score and emits the related action event
-public fun record_action(agent: &mut ANIMA, swap_result: &sui::coin::Coin<SUI>) {
+public(package) fun record_action(agent: &mut ANIMA, swap_result: &sui::coin::Coin<SUI>) {
     increment_reputation(agent);
     events::emit_action(object::uid_to_inner(&agent.id), swap_result);
 }
 
 /// Grants access to read the internal identifier context
-public fun borrow_uid_mut(agent: &mut ANIMA): &mut UID {
+public(package) fun borrow_uid_mut(agent: &mut ANIMA): &mut UID {
     &mut agent.id
 }
 

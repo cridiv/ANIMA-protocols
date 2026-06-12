@@ -1,12 +1,13 @@
 module anima::wallet;
 
 use anima::protocol::{Self, ANIMA};
-use sui::balance;
+
 use sui::coin::{Self, Coin};
 use sui::sui::SUI;
 
 // --- Errors ---
 const EInsufficientFundsAllocation: u64 = 1;
+const EUnauthorizedOperator: u64 = 4;
 
 // --- Public Executions ---
 
@@ -17,7 +18,7 @@ public fun deposit_funds(agent: &mut ANIMA, funding_coin: Coin<SUI>) {
     protocol::assert_not_paused(agent);
 
     // Unpack the coin into its underlying balance representation
-    let funding_balance = coin::into_balance(funding_coin);
+    let funding_balance = funding_coin.into_balance();
 
     // Safely route the balance to the package-internal mutator
     protocol::mutate_balance(agent, funding_balance);
@@ -36,12 +37,15 @@ public fun extract_funds_for_action(
     // 1. Enforce that the state machine is active
     protocol::assert_not_paused(agent);
 
-    // 2. Safely borrow a mutable pointer to the encapsulated wallet balance
+    // 2. Cryptographic operator authorization — only the bound hot-wallet can extract
+    assert!(ctx.sender() == protocol::operator_address(agent), EUnauthorizedOperator);
+
+    // 3. Safely borrow a mutable pointer to the encapsulated wallet balance
     let agent_balance_mut = protocol::borrow_balance_mut(agent);
 
-    // 3. Assert economic constraints before attempting extraction
-    assert!(balance::value(agent_balance_mut) >= amount, EInsufficientFundsAllocation);
+    // 4. Assert economic constraints before attempting extraction
+    assert!(agent_balance_mut.value() >= amount, EInsufficientFundsAllocation);
 
-    // 4. Slice out the specific token amount and return it as a concrete Coin resource
+    // 5. Slice out the specific token amount and return it as a concrete Coin resource
     coin::take(agent_balance_mut, amount, ctx)
 }

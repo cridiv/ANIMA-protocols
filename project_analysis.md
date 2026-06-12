@@ -33,7 +33,7 @@ graph TD
 ---
 
 ## 2. On-Chain Contracts (`contracts/`)
-Located at [contracts/sources](file:///c:/Users/PC/Desktop/Coding/ANIMA-protocol/contracts/sources). Deployed on Sui Testnet under Package ID: `0xaf79d9aaf7fd188a4f7163003792c521f8d6a41a60ea7a1f360aebcec7006bdb`.
+Located at [contracts/sources](file:///c:/Users/PC/Desktop/Coding/ANIMA-protocol/contracts/sources). Deployed on Sui Testnet under Package ID: `0x63b6429339342dd64edd48c56420983c1dd37b4d8e573123e051a4cf52a092a1`.
 
 ### Core Data Models
 *   **`ANIMA`**: The agent's identity object. Tracks state variables:
@@ -56,7 +56,7 @@ Located at [contracts/sources](file:///c:/Users/PC/Desktop/Coding/ANIMA-protocol
     *   Links arbitrary capabilities to the agent via dynamic fields of key `SkillKey { name }` and value `walrus_blob_id` (a `String`).
     *   Operations: `authorize_skill`, `update_skill_manifest`, `revoke_skill`, and `read_skill_blob`.
 4.  **`events.move`**:
-    *   Emits: `AnimaMinted`, `EmergencyHatchTriggered`, `ComputeSettled`, and `AgentActionEvent`.
+    *   Emits: `AnimaMinted`, `EmergencyHatchTriggered`, `ComputeSettled`, and `AgentActionExecuted`.
 
 ---
 

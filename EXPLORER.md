@@ -307,7 +307,7 @@ async function startEventPollingIndexer() {
   setInterval(async () => {
     try {
       const eventResponse = await client.queryEvents({
-        query: { MoveEventType: `${PACKAGE_ID}::events::AgentActionEvent` },
+        query: { MoveEventType: `${PACKAGE_ID}::events::AgentActionExecuted` },
         cursor: nextCursor,
         order: "ascending",
       });
@@ -318,7 +318,7 @@ async function startEventPollingIndexer() {
         );
 
         for (const ev of eventResponse.data) {
-          await handleAgentActionEvent(ev);
+          await handleAgentActionExecuted(ev);
         }
 
         // Advance cursor to prevent replaying events
@@ -338,7 +338,7 @@ startEventPollingIndexer();
 **`indexer/handlers.ts`** — parse and write:
 
 ```typescript
-async function handleAgentActionEvent(eventData: any) {
+async function handleAgentActionExecuted(eventData: any) {
   // Extract typed variables from Move event payload
   const { agent_id, action_type, amount, target_protocol } =
     eventData.parsedJson;

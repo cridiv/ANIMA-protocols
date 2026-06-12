@@ -1,8 +1,7 @@
 module anima::events;
 
-use sui::coin::{Self, Coin};
+use sui::coin::Coin;
 use sui::event;
-use sui::object::ID;
 use sui::sui::SUI;
 
 // --- Structural Verification Events ---
@@ -23,7 +22,7 @@ public struct ComputeSettled has copy, drop {
     amount: u64,
 }
 
-public struct AgentActionEvent has copy, drop {
+public struct AgentActionExecuted has copy, drop {
     anima_id: ID,
     amount_swapped: u64,
 }
@@ -40,11 +39,11 @@ public fun emit_compute_settled(anima_id: ID, amount: u64) {
     event::emit(ComputeSettled { anima_id, amount });
 }
 
-/// Primary action emission. Increments agent reputation score directly as a byproduct of execution.
+/// Primary action emission.
 public fun emit_action(anima_id: ID, swap_result: &Coin<SUI>) {
-    let amount_swapped = coin::value(swap_result);
+    let amount_swapped = swap_result.value();
 
-    event::emit(AgentActionEvent {
+    event::emit(AgentActionExecuted {
         anima_id,
         amount_swapped,
     });

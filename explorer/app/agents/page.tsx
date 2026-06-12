@@ -35,7 +35,7 @@ interface AgentItem {
 const MOCK_AGENTS: AgentItem[] = [
   {
     objectId:
-      "0xaf79d9aaf7fd188a4f7163003792c521f8d6a41a60ea7a1f360aebcec7006bdb",
+      "0x63b6429339342dd64edd48c56420983c1dd37b4d8e573123e051a4cf52a092a1",
     name: "Atlas V1",
     status: "ACTIVE",
     reputation: 142,

@@ -200,7 +200,7 @@ export class IndexerService implements OnModuleInit, OnModuleDestroy {
       let amountVal = 0;
 
       // Normalize action types and amount according to struct
-      if (structName === 'AgentActionEvent') {
+      if (structName === 'AgentActionExecuted') {
         actionType = 'SWAP';
         amountVal = parsedJson.amount_swapped ? Number(parsedJson.amount_swapped) : 0;
       } else if (structName === 'ComputeSettled') {

@@ -1,4 +1,4 @@
-﻿# ANIMA — Agent Native Identity & Machine Autonomy
+# ANIMA — Agent Native Identity & Machine Autonomy
 
 > _Giving AI agents a soul on-chain. First-class agent identity, accountability, and autonomy on Sui._
 
@@ -224,7 +224,7 @@ Days 24–27  │ Phase 4: Polish & Demo │ UI polish, demo script, submission 
 - [x] Scaffold the `ANIMA` struct with all fields (id, name, reputation_score, is_paused, wallet_balance)
 - [x] Scaffold the `OwnerCap` struct
 - [x] Write the `mint_anima` entry function — human calls this, receives OwnerCap
-- [x] Define all event structs in `events.move` (AgentActionEvent, EmergencyHatchTriggered, ComputeSettled)
+- [x] Define all event structs in `events.move` (AgentActionExecuted, EmergencyHatchTriggered, ComputeSettled)
 - [ ] Deploy scaffold to Sui testnet and confirm object creation works
 - [ ] Share the deployed package ID with Ademola so he can start building against it
 
@@ -313,7 +313,7 @@ Days 24–27  │ Phase 4: Polish & Demo │ UI polish, demo script, submission 
   - Builds a PTB that:
     1. Validates skill authorization against the ANIMA skill registry
     2. Executes the swap/transfer
-    3. Emits the custom AgentActionEvent
+    3. Emits the custom AgentActionExecuted
   - Signs and submits the PTB to Sui testnet
 - [ ] Test PTB execution independently — confirm the transaction lands and the event is emitted
 
@@ -324,7 +324,7 @@ Days 24–27  │ Phase 4: Polish & Demo │ UI polish, demo script, submission 
   - Execute a token swap using the agent wallet as the signer context
   - Return the swap result to the PTB executor
 - [ ] Build `events/indexer.ts` — Sui event listener
-  - Subscribe to AgentActionEvent from the ANIMA package
+  - Subscribe to AgentActionExecuted from the ANIMA package
   - Store events in memory (or a simple SQLite/JSON file for hackathon scope)
   - Expose a REST endpoint `GET /agent/:id/events` that the explorer polls
 - [ ] Build `routes/agent.ts` — REST API routes
@@ -593,7 +593,7 @@ The complete end-to-end demonstration sequence for judges:
 6. PTB executes atomically
    → Skill authorization validated
    → Swap executes on DeepBook
-   → AgentActionEvent emitted in the same transaction
+   → AgentActionExecuted emitted in the same transaction
 
 7. Explorer updates live
    → New action appears at the top of the live feed

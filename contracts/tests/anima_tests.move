@@ -21,6 +21,7 @@ fun setup_test(): (Scenario, ANIMA, OwnerCap, BackendCap) {
     // 1. Execute the initial agent container initialization block
     let (agent, cap, backend_cap) = protocol::mint_agent(
         string::utf8(b"Anima_Cortex_v1"),
+        BACKEND_ADDR,
         test_scenario::ctx(&mut scenario),
     );
 
@@ -79,13 +80,13 @@ fun test_deposit_and_settlement_loops() {
 
 #[test]
 fun test_dynamic_field_skill_registry() {
-    let (mut scenario, mut agent, cap, backend_cap) = setup_test();
+    let (scenario, mut agent, cap, backend_cap) = setup_test();
 
     let skill_name = string::utf8(b"DeepBook_Arb_Core");
     let blob_id = string::utf8(b"walrus_blob_hash_0x8821a");
 
     // 1. Authorize a dynamic skill manifest using the OwnerCap certificate
-    skill_registry::authorize_skill(&mut agent, skill_name, blob_id, &cap);
+    skill_registry::authorize_skill(&mut agent, &cap, skill_name, blob_id);
 
     // 2. Read back the skill configuration using the view wrapper path
     let recorded_blob = skill_registry::read_skill_blob(&agent, skill_name);
@@ -93,7 +94,7 @@ fun test_dynamic_field_skill_registry() {
 
     // 3. Update the dynamic skill tracking hash to point to new model weights
     let updated_blob_id = string::utf8(b"walrus_blob_hash_updated_0x9943b");
-    skill_registry::update_skill_manifest(&mut agent, skill_name, updated_blob_id, &cap);
+    skill_registry::update_skill_manifest(&mut agent, &cap, skill_name, updated_blob_id);
 
     let verified_blob = skill_registry::read_skill_blob(&agent, skill_name);
     assert!(verified_blob == updated_blob_id, 1);
