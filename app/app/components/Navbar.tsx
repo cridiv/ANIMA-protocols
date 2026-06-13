@@ -10,10 +10,13 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="fixed z-50 left-0 top-0 w-full hidden md:block bg-transparent backdrop-blur-md ">
+      <header className="fixed z-50 left-0 top-0 w-full hidden md:block bg-transparent ">
         <div className="container mx-auto flex items-center justify-between py-4 px-6">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 font-bold text-xl">
+          <Link
+            href="/"
+            className="flex p-4 backdrop-blur-md items-center gap-2 font-bold text-xl"
+          >
             <svg
               viewBox="0 0 24 24"
               fill="none"
