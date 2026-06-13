@@ -2,6 +2,8 @@
 
 import logging
 import numpy as np
+import os
+import time
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime
@@ -306,6 +308,82 @@ class PricePredictor:
                 price=current_price,
                 timestamp=datetime.utcnow(),
                 reasoning=f"Error: {str(e)}"
+            )
+            return signal
+    
+    def get_last_signal(self) -> Optional[Signal]:
+        """Get the most recent signal."""
+        return self.last_signal
+
+
+class MockPredictor:
+    """
+    Mock predictor for testing.
+    
+    Fires BUY_SIGNAL at a configured interval (default 45 seconds).
+    Useful for testing the orchestrator and backend without ML models.
+    """
+    
+    def __init__(self, signal_interval: int = 45):
+        """
+        Initialize mock predictor.
+        
+        Args:
+            signal_interval: Seconds between BUY_SIGNAL firings
+        """
+        self.signal_interval = signal_interval
+        self.last_signal_time: Optional[float] = None
+        self.signal_count = 0
+        self.last_signal: Optional[Signal] = None
+    
+    def predict(self, prices: List[float]) -> Signal:
+        """
+        Generate mock trading signal.
+        
+        Returns BUY_SIGNAL every signal_interval seconds, HOLD otherwise.
+        """
+        current_time = time.time()
+        
+        if self.last_signal_time is None:
+            # First signal
+            self.last_signal_time = current_time
+            self.signal_count += 1
+            signal = Signal(
+                action="BUY_SIGNAL",
+                confidence=95.0,
+                price=prices[-1] if prices else 0.0,
+                timestamp=datetime.utcnow(),
+                reasoning=f"Mock signal #{self.signal_count} (interval={self.signal_interval}s)"
+            )
+            self.last_signal = signal
+            logger.info(f"🚨 Mock predictor fired BUY_SIGNAL")
+            return signal
+        
+        time_since_last = current_time - self.last_signal_time
+        
+        if time_since_last >= self.signal_interval:
+            # Time for next signal
+            self.last_signal_time = current_time
+            self.signal_count += 1
+            signal = Signal(
+                action="BUY_SIGNAL",
+                confidence=95.0,
+                price=prices[-1] if prices else 0.0,
+                timestamp=datetime.utcnow(),
+                reasoning=f"Mock signal #{self.signal_count} (fired every {self.signal_interval}s)"
+            )
+            self.last_signal = signal
+            logger.info(f"🚨 Mock predictor fired BUY_SIGNAL #{self.signal_count}")
+            return signal
+        
+        else:
+            # Hold signal
+            signal = Signal(
+                action="HOLD",
+                confidence=50.0,
+                price=prices[-1] if prices else 0.0,
+                timestamp=datetime.utcnow(),
+                reasoning=f"Waiting for next signal ({self.signal_interval - time_since_last:.0f}s remaining)"
             )
             return signal
     

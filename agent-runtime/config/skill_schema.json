@@ -1,27 +1,47 @@
 {
-  "skill_name": "token_price_monitor",
-  "description": "Monitors a token price and triggers a swap action when price crosses threshold",
-  "version": "1.0",
-  "author": "ANIMA Agent Runtime",
-  "trigger": {
-    "type": "price_threshold",
-    "token": "SUI",
-    "condition": "below",
-    "value": 0.4,
-    "description": "Fire action when SUI price drops below $0.40"
+  "skill_name": "DeepBook_HighFreq_Arbitrage",
+  "version": "1.0.0",
+  "description": "High-frequency arbitrage strategy on DeepBook V3 pools",
+  "author": "ezekiel",
+  "target_pairs": [
+    "SUI/USDC",
+    "SUI/USDT"
+  ],
+  "execution_constraints": {
+    "max_spend_per_ptb_mist": 5000000000,
+    "max_slippage_percentage": 0.5,
+    "cooldown_period_seconds": 15,
+    "max_open_positions": 10,
+    "max_daily_loss_mist": 10000000000
   },
-  "action": {
-    "type": "swap",
-    "from_token": "USDC",
-    "to_token": "SUI",
-    "amount_percentage": 10,
-    "description": "Swap 10% of USDC balance for SUI when trigger fires"
+  "model_telemetry": {
+    "engine": "sklearn_crossover_v1",
+    "observation_interval_ms": 3000,
+    "fast_ma_window": 5,
+    "slow_ma_window": 20,
+    "min_confidence_threshold": 60.0
   },
-  "risk_limits": {
-    "max_spend_per_action": 10.0,
-    "daily_spend_cap": 50.0,
-    "max_slippage_percent": 1.0,
-    "description": "Safety limits to prevent excessive spending or bad trades"
+  "risk_parameters": {
+    "position_size_ratio": 0.1,
+    "stop_loss_percentage": 2.0,
+    "take_profit_percentage": 5.0,
+    "max_leverage": 1.0
+  },
+  "operational_modes": {
+    "normal": "Agent executes all valid signals",
+    "conservative": "Only execute signals with >80% confidence",
+    "paused": "No execution, monitoring only"
+  },
+  "data_sources": {
+    "price_feed": "DeepBook V3",
+    "frequency": "real-time",
+    "fallback": "coingecko_30s"
+  },
+  "audit_trail": {
+    "log_all_signals": true,
+    "log_execution_details": true,
+    "store_price_history": true,
+    "retention_days": 30
   },
   "execution_context": {
     "blockchain": "sui",
@@ -30,8 +50,8 @@
     "settlement_layer": "sui_ptb"
   },
   "metadata": {
-    "created_at": "2026-05-29T00:00:00Z",
-    "updated_at": "2026-05-29T00:00:00Z",
+    "created_at": "2026-06-13T05:21:01.756Z",
+    "updated_at": "2026-06-13T05:21:01.756Z",
     "status": "active",
     "training_data_version": "v1.0"
   }
