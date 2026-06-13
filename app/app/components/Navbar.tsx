@@ -115,7 +115,7 @@ const Navbar = () => {
 
             <div className="group !leading-1.4 text-base relative">
               <Link
-                href="#agents"
+                href="/mint"
                 className="h-full hover:text-[#0241ff] cursor-pointer px-2 tracking-[-0.03em] whitespace-nowrap md:text-sm lg:text-base transition-colors"
               >
                 Mint Agents
