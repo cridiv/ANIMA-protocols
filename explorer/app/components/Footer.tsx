@@ -204,9 +204,9 @@ const Footer = () => {
             <path
               d="M12 6.5C10.5 4.2 7.2 4.2 5.5 6.2C3.2 8.8 4.5 13.2 12 18.5C19.5 13.2 20.8 8.8 18.5 6.2C16.8 4.2 13.5 4.2 12 6.5Z"
               stroke="white"
-              stroke-width="1.5"
-              stroke-linejoin="round"
-              stroke-linecap="round"
+              strokeWidth="1.5"
+              strokeLinejoin="round"
+              strokeLinecap="round"
             />
 
             <polygon points="6.5,8.5 17.5,8.5 16,11 12,12 8,11" fill="white" />
@@ -214,8 +214,8 @@ const Footer = () => {
             <path
               d="M12 12V14.5M12 14.5L9.5 13.5M12 14.5L14.5 13.5M12 14.5V17"
               stroke="white"
-              stroke-width="1.2"
-              stroke-linecap="round"
+              strokeWidth="1.2"
+              strokeLinecap="round"
             />
 
             <circle cx="12" cy="14.5" r="1" fill="white" />
