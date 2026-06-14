@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { ExternalLink, Menu, X } from "lucide-react";
 import { ConnectButton } from "@mysten/dapp-kit";
-import ConnectBtn from "./ConnectBtn";
 
 const Navbar = () => {
   const [isAboutOpen, setIsAboutOpen] = useState(false);

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ExternalLink, Menu, Wifi } from "lucide-react";
 import Link from "next/link";
+import { ConnectButton } from "@mysten/dapp-kit";
 
 const Navbar = () => {
   const [isBlockchainOpen, setIsBlockchainOpen] = useState(false);
@@ -90,9 +91,7 @@ const Navbar = () => {
       {/* Right Side Actions */}
       <div className="ml-auto flex items-center gap-x-2 md:gap-x-3">
         {/* Connect Wallet Button - Hidden on small screens */}
-        <button className="hidden sm:inline-flex items-center primary-button gap-2 rounded-full cursor-pointer hover:scale-95 px-4 py-2 text-sm font-medium text-white transition-all hover:shadow-lg">
-          Connect wallet
-        </button>
+        <ConnectButton className="w-full primary-button inline-flex items-center justify-center gap-2 !rounded-full cursor-pointer hover:scale-95 px-5 py-3 text-sm font-medium !text-white transition-all hover:shadow-lg mt-2" />
 
         {/* Theme Toggle Button */}
         <div className="pointer-events-auto  bg-[#6fa0ff]/15 px-4 py-2 rounded-full">
@@ -139,9 +138,7 @@ const Navbar = () => {
               />
             </Link>
 
-            <button className="w-full primary-button inline-flex items-center justify-center gap-2 rounded-full cursor-pointer hover:scale-95 px-4 py-2 text-sm font-medium text-white transition-all hover:shadow-lg mt-2">
-              Connect wallet
-            </button>
+            <ConnectButton className="w-full primary-button inline-flex items-center justify-center gap-2 !rounded-full cursor-pointer hover:scale-95 px-5 py-3 text-sm font-medium !text-white transition-all hover:shadow-lg mt-2" />
           </nav>
         </div>
       )}

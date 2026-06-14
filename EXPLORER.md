@@ -203,6 +203,7 @@ Build these components with **mocked data first**, wire to real data on Day 3:
 Set up dynamic routing for agent lookup `/agent/[id]`. Build helper functions to route searches and validate Sui address format before navigating.
 
 **`SearchBar.tsx`** updates:
+
 - Check if search input matches standard 64-character hex format (`0x...`).
 - Route successfully to `/agent/[id]`.
 - Implement responsive design for mobile lookups.
@@ -212,6 +213,7 @@ Set up dynamic routing for agent lookup `/agent/[id]`. Build helper functions to
 Build all agent profile components with **static mocked data**. Focus on layout, aesthetics, and structure, not real data yet.
 
 **`AgentHeader.tsx`:**
+
 ```
 ANIMA: "Atlas"                    ● ACTIVE
 0x1a2b3c...4d5e  [Copy] [View on Sui Explorer ↗]
@@ -219,28 +221,33 @@ Minted: May 27, 2026  |  Rep Score: 142
 ```
 
 **`IdentityPanel.tsx`:**
+
 - Owner address → links to `https://suiexplorer.com/address/[ownerAddress]?network=testnet`
 - OwnerCap ID → links to Sui explorer
 - Mint date
 - Reputation score (rendered with simple numerical component or micro-loading bar visualization)
 
 **`WalletPanel.tsx`:**
+
 - Current balance in SUI (explicitly displaying numeric SUI balance, polled every 10 seconds on real hook)
 - Total lifetime volume (read-only)
 - No interactive funding actions (as funding is handled by the Product Interface).
 
 **`SkillRegistry.tsx`:**
+
 - List of skills, each showing:
   - Skill name
   - Walrus blob ID (truncated, with copy button)
   - "View on Walrus ↗" external link (linking out to retrieve the JSON config blob)
 
 **`ActionFeed.tsx`:**
+
 - Table/list of actions, newest first
 - Each row: tx type badge, amount, protocol, timestamp, tx digest linked to Sui explorer
 - Empty state: "No actions yet — agent is monitoring"
 
 **End of Day 2 checkpoint:**
+
 - [ ] Search input validates and routes to `/agent/[id]`
 - [ ] Static agent profile dashboard renders all sections correctly on different screen sizes
 - [ ] SUI balance display placeholder is prominent on WalletPanel
@@ -415,12 +422,14 @@ Trigger a test transaction on testnet and confirm the event appears in Supabase.
 ```
 
 **Kill switch confirmation modal:**
+
 - Warning message: "This will permanently pause your agent and return all funds to your wallet."
 - Two buttons: Cancel / Confirm & Sign
 - On confirm → build and sign `trigger_emergency_kill` transaction
 - On success → agent status updates to PAUSED, balance shows 0
 
 #### Late Morning — UI Refinements (1 hour)
+
 - Refine loading skeletons for the lookup page and agent profile.
 - Verify polling tick intervals for `useAgent.ts` (polling every 10 seconds for the numeric SUI balance).
 - Tweak the status badge animation (pulsing green dot for `ACTIVE`, static red dot for `PAUSED`).
@@ -592,3 +601,5 @@ Fix any bugs that surface during the runs.
 
 _ANIMA Explorer — Sui Overflow 2026_
 _Owner: Joshua | 5 Day Build Target_
+
+//NOTE [HIGHLY IMPORTANT!!!]:This is an addition to the prompt disregard the product interface in the plan and also this is important don't add the indexer folder in the explorer folder but it in the root folder

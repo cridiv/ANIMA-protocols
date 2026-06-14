@@ -4,6 +4,15 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Navbar from "../components/Navbar";
 import { Cpu, Shield, Database, Sparkles, CheckCircle2 } from "lucide-react";
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+  useSuiClient,
+  ConnectButton,
+} from "@mysten/dapp-kit";
+import { Transaction } from "@mysten/sui/transactions";
+
+const PACKAGE_ID = "0x63b6429339342dd64edd48c56420983c1dd37b4d8e573123e051a4cf52a092a1";
 
 export default function MintPage() {
   const [name, setName] = useState("");
@@ -12,21 +21,95 @@ export default function MintPage() {
   const [isMinting, setIsMinting] = useState(false);
   const [mintedSuccess, setMintedSuccess] = useState(false);
   const [mintedInfo, setMintedInfo] = useState<{ nfaId: string; ownerCapId: string } | null>(null);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleMint = (e: React.FormEvent) => {
+  const currentAccount = useCurrentAccount();
+  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+  const suiClient = useSuiClient();
+
+  const handleMint = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !operatorAddress || !skillBlobId) return;
+    if (!currentAccount) {
+      setErrorMsg("Please connect your wallet first.");
+      return;
+    }
 
     setIsMinting(true);
-    // Simulate smart contract interaction (Minting on Sui Testnet)
-    setTimeout(() => {
-      setIsMinting(false);
-      setMintedSuccess(true);
-      setMintedInfo({
-        nfaId: "0x" + Math.random().toString(16).substr(2, 40),
-        ownerCapId: "0x" + Math.random().toString(16).substr(2, 40),
+    setErrorMsg("");
+
+    try {
+      const tx = new Transaction();
+
+      // Step 1: Mint the agent identity container and get the capability tuples
+      const [agent, ownerCap, backendCap] = tx.moveCall({
+        target: `${PACKAGE_ID}::protocol::mint_agent`,
+        arguments: [
+          tx.pure.string(name),
+          tx.pure.address(operatorAddress),
+        ],
       });
-    }, 2000);
+
+      // Step 2: Authorize initial operational skill capability on Walrus
+      tx.moveCall({
+        target: `${PACKAGE_ID}::skill_registry::authorize_skill`,
+        arguments: [
+          agent,
+          ownerCap,
+          tx.pure.string("main"), // Default skill name
+          tx.pure.string(skillBlobId),
+        ],
+      });
+
+      // Step 3: Publicly share the agent (ANIMA) object
+      tx.moveCall({
+        target: "0x2::transfer::public_share_object",
+        typeArguments: [`${PACKAGE_ID}::protocol::ANIMA`],
+        arguments: [agent],
+      });
+
+      // Step 4: Transfer OwnerCap and BackendCap to the guardian wallet
+      tx.transferObjects([ownerCap, backendCap], currentAccount.address);
+
+      // Execute transaction block using current account provider
+      const response = await signAndExecuteTransaction({ transaction: tx });
+
+      // Wait for the transaction on-chain validation and get changes
+      const txBlock = await suiClient.waitForTransaction({
+        digest: response.digest,
+        options: {
+          showObjectChanges: true,
+        },
+      });
+
+      const objectChanges = txBlock.objectChanges;
+      if (objectChanges) {
+        let animaId = "";
+        let ownerCapId = "";
+        for (const change of objectChanges) {
+          if (change.type === "created") {
+            if (change.objectType === `${PACKAGE_ID}::protocol::ANIMA`) {
+              animaId = change.objectId;
+            } else if (change.objectType === `${PACKAGE_ID}::protocol::OwnerCap`) {
+              ownerCapId = change.objectId;
+            }
+          }
+        }
+
+        setMintedSuccess(true);
+        setMintedInfo({
+          nfaId: animaId || "Not found in transaction changes",
+          ownerCapId: ownerCapId || "Not found in transaction changes",
+        });
+      } else {
+        throw new Error("No object changes detected in the transaction effects.");
+      }
+    } catch (err: any) {
+      console.error("Failed to mint ANIMA NFA:", err);
+      setErrorMsg(err.message || "Failed to execute transaction on Sui Testnet.");
+    } finally {
+      setIsMinting(false);
+    }
   };
 
   return (
@@ -43,7 +126,18 @@ export default function MintPage() {
               <h2 className="text-2xl font-bold tracking-tight">Mint Non-Fungible Agent</h2>
             </div>
 
-            {mintedSuccess && mintedInfo ? (
+            {!currentAccount ? (
+              <div className="flex flex-col items-center justify-center py-10 text-center bg-zinc-50 border border-zinc-200/60 border-dashed rounded-3xl p-6">
+                <Shield className="w-10 h-10 text-blue-500 mb-3" />
+                <h3 className="font-bold text-base text-zinc-800">Wallet Disconnected</h3>
+                <p className="text-xs text-zinc-500 mt-1 max-w-xs mb-6 leading-relaxed">
+                  To instantiate your sovereign Non-Fungible Agent on Sui Testnet, please connect your Guardian wallet first.
+                </p>
+                <div className="flex justify-center w-full">
+                  <ConnectButton />
+                </div>
+              </div>
+            ) : mintedSuccess && mintedInfo ? (
               <div className="space-y-6">
                 <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5" />
@@ -92,6 +186,12 @@ export default function MintPage() {
               </div>
             ) : (
               <form onSubmit={handleMint} className="space-y-5">
+                {errorMsg && (
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-xs text-red-700 leading-relaxed break-all">
+                    {errorMsg}
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-xs font-bold uppercase text-zinc-500 mb-1.5">Agent Name</label>
                   <input
