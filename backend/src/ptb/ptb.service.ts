@@ -80,7 +80,7 @@ export class PtbService {
 
     // 1. Verify skill authorization
     const [skillAuth] = tx.moveCall({
-      target: `${packageId}::anima::verify_skill_auth`,
+      target: `${packageId}::skill_registry::read_skill_blob`,
       arguments: [
         tx.object(params.animaObjectId),
         tx.pure.string(params.skillName),
@@ -117,7 +117,7 @@ export class PtbService {
       tx.moveCall({
         target: `${packageId}::events::emit_action`,
         arguments: [
-          tx.object(params.animaObjectId),
+          tx.pure.address(params.animaObjectId),
           coinToEmit,
         ],
       });
@@ -140,7 +140,7 @@ export class PtbService {
       tx.moveCall({
         target: `${packageId}::events::emit_action`,
         arguments: [
-          tx.object(params.animaObjectId),
+          tx.pure.address(params.animaObjectId),
           extractedCoin,
         ],
       });
