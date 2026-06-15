@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { Wallet, TrendingUp, RefreshCw, X, Coins } from "lucide-react";
+import { Wallet, TrendingUp, RefreshCw, X, Coins, Check, Loader2 } from "lucide-react";
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { PACKAGE_ID } from "../../../../lib/constants";
+import { supabase } from "@/lib/supabase";
 
 interface WalletPanelProps {
   agentObjectId: string;
@@ -24,6 +25,8 @@ export default function WalletPanel({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [depositAmount, setDepositAmount] = useState("");
   const [isDepositing, setIsDepositing] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const currentAccount = useCurrentAccount();
   const suiClient = useSuiClient();
@@ -31,9 +34,10 @@ export default function WalletPanel({
 
   const handleDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage("");
     const amount = parseFloat(depositAmount);
     if (isNaN(amount) || amount <= 0) {
-      alert("Please enter a valid deposit amount.");
+      setErrorMessage("Please enter a valid deposit amount.");
       return;
     }
 
@@ -60,13 +64,28 @@ export default function WalletPanel({
       const response = await signAndExecuteTransaction({ transaction: tx });
       await suiClient.waitForTransaction({ digest: response.digest });
       
-      alert(`Successfully deposited ${amount} SUI into the agent vault!`);
-      setIsModalOpen(false);
-      setDepositAmount("");
-      window.location.reload();
+      // Log the deposit action in Supabase
+      try {
+        await supabase.from("agent_actions").insert({
+          agent_object_id: agentObjectId,
+          tx_digest: response.digest,
+          action_type: "TRANSFER",
+          amount: amountInMist.toString(),
+          from_token: "SUI",
+          to_token: "SUI",
+          target_protocol: "Deposit",
+          status: "success",
+          checkpoint: 0,
+          timestamp: new Date().toISOString(),
+        });
+      } catch (dbErr) {
+        console.warn("Could not log deposit action in Supabase:", dbErr);
+      }
+
+      setIsSuccess(true);
     } catch (err: any) {
       console.error("Deposit failed:", err);
-      alert(err.message || "Failed to complete deposit transaction.");
+      setErrorMessage(err.message || "Failed to complete deposit transaction.");
     } finally {
       setIsDepositing(false);
     }
@@ -150,62 +169,107 @@ export default function WalletPanel({
       {/* Fund Agent Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="glass-card max-w-md w-full p-6 border-blue-500/30 flex flex-col gap-6 shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <div className="flex items-center gap-2 text-[#6fa0ff] font-bold">
-                <Coins size={20} />
-                <h2>Fund Sovereign Agent Wallet</h2>
-              </div>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-gray-400 hover:text-background transition-colors cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <form onSubmit={handleDeposit} className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-gray-400">
-                  Amount to Deposit (SUI)
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    required
-                    placeholder="e.g. 5.5"
-                    value={depositAmount}
-                    onChange={(e) => setDepositAmount(e.target.value)}
-                    className="w-full rounded-xl bg-white/5 border border-white/10 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand text-background pr-[60px]"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-xs text-[#6fa0ff]">
-                    SUI
-                  </span>
+          <div className="glass-card max-w-md w-full p-6 border-blue-500/30 flex flex-col gap-6 shadow-[0_12px_40px_rgba(0,0,0,0.5)] animate-fadeIn">
+            
+            {isSuccess ? (
+              <div className="flex flex-col items-center justify-center py-6 text-center gap-3 animate-fadeIn">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                  <Check size={24} />
                 </div>
-                <p className="text-[10px] text-gray-500 leading-relaxed mt-1">
-                  This transaction will extract SUI from your connected wallet and deposit it directly into the agent's internal vault balance.
+                <h3 className="font-bold text-base text-background">Deposit Successful!</h3>
+                <p className="text-xs text-gray-400 max-w-xs leading-relaxed mt-1">
+                  Successfully deposited {depositAmount} SUI into the agent vault. The new balance will reflect shortly.
                 </p>
+                <button
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setIsSuccess(false);
+                    setDepositAmount("");
+                    window.location.reload();
+                  }}
+                  className="mt-6 w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-xs text-background transition-colors cursor-pointer"
+                >
+                  Close & Refresh Page
+                </button>
               </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                  <div className="flex items-center gap-2 text-[#6fa0ff] font-bold">
+                    <Coins size={20} />
+                    <h2>Fund Sovereign Agent Wallet</h2>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsModalOpen(false);
+                      setErrorMessage("");
+                    }}
+                    className="text-gray-400 hover:text-background transition-colors cursor-pointer"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
 
-              <div className="flex gap-3 mt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-lg border border-white/10 hover:bg-white/5 font-semibold text-xs text-background transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isDepositing}
-                  className="flex-1 py-2.5 rounded-lg bg-[#0241ff] hover:bg-[#0241ff]/90 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
-                >
-                  {isDepositing ? "Depositing..." : "Confirm Deposit"}
-                </button>
-              </div>
-            </form>
+                {errorMessage && (
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-xs text-red-300 leading-relaxed break-all">
+                    {errorMessage}
+                  </div>
+                )}
+
+                <form onSubmit={handleDeposit} className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-gray-400">
+                      Amount to Deposit (SUI)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        required
+                        placeholder="e.g. 5.5"
+                        value={depositAmount}
+                        onChange={(e) => setDepositAmount(e.target.value)}
+                        className="w-full rounded-xl bg-white/5 border border-white/10 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand text-background pr-[60px]"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-xs text-[#6fa0ff]">
+                        SUI
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-gray-500 leading-relaxed mt-1">
+                      This transaction will extract SUI from your connected wallet and deposit it directly into the agent's internal vault balance.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3 mt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsModalOpen(false);
+                        setErrorMessage("");
+                      }}
+                      className="flex-1 py-2.5 rounded-lg border border-white/10 hover:bg-white/5 font-semibold text-xs text-background transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isDepositing}
+                      className="flex-1 py-2.5 rounded-lg bg-[#0241ff] hover:bg-[#0241ff]/90 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
+                    >
+                      {isDepositing ? (
+                        <>
+                          <Loader2 size={13} className="animate-spin" />
+                          Depositing...
+                        </>
+                      ) : (
+                        "Confirm Deposit"
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
           </div>
         </div>
       )}
