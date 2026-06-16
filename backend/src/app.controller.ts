@@ -7,6 +7,11 @@ export class AppController {
 
   constructor(private readonly suiService: SuiService) {}
 
+  @Get()
+  getRoot() {
+    return { message: 'ANIMA backend is running smoothly!' };
+  }
+
   @Get('health')
   async getHealth() {
     let suiStatus = 'unreachable';

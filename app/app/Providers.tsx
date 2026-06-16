@@ -35,7 +35,10 @@ function EnokiWalletWrapper() {
     const { unregister } = registerEnokiWallets({
       apiKey,
       providers: {
-        google: { clientId: googleClientId },
+        google: {
+          clientId: googleClientId,
+          redirectUrl: window.location.origin,
+        },
       },
       client,
       network: "testnet",

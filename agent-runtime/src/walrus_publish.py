@@ -2,6 +2,7 @@
 
 import json
 import logging
+import os
 import requests
 from typing import Optional, Dict, Any
 from pathlib import Path
@@ -18,8 +19,8 @@ class WalrusPublisher:
     """
     
     # Walrus testnet endpoints
-    WALRUS_PUBLISHER_URL = "https://publisher.walrus.testnet.sui.io/v1/store"
-    WALRUS_AGGREGATOR_URL = "https://aggregator.walrus.testnet.sui.io"
+    WALRUS_PUBLISHER_URL = "https://publisher.walrus-testnet.walrus.space/v1/blobs"
+    WALRUS_AGGREGATOR_URL = "https://aggregator.walrus-testnet.walrus.space"
     
     def __init__(self, publisher_url: Optional[str] = None, aggregator_url: Optional[str] = None):
         """
@@ -29,8 +30,28 @@ class WalrusPublisher:
             publisher_url: Override default publisher endpoint
             aggregator_url: Override default aggregator endpoint
         """
-        self.publisher_url = publisher_url or self.WALRUS_PUBLISHER_URL
-        self.aggregator_url = aggregator_url or self.WALRUS_AGGREGATOR_URL
+        # Check environment overrides
+        env_publisher = os.getenv("WALRUS_PUBLISHER_URL")
+        env_aggregator = os.getenv("WALRUS_AGGREGATOR_URL")
+        
+        # Also check WALRUS_ENDPOINT to construct them if they aren't explicitly set
+        env_endpoint = os.getenv("WALRUS_ENDPOINT")
+        if env_endpoint:
+            if not env_publisher:
+                # If endpoint doesn't end with /v1/blobs, add it
+                if not env_endpoint.endswith("/v1/blobs"):
+                    env_publisher = f"{env_endpoint.rstrip('/')}/v1/blobs"
+                else:
+                    env_publisher = env_endpoint
+            if not env_aggregator:
+                # Aggregator is the base endpoint
+                if env_endpoint.endswith("/v1/blobs"):
+                    env_aggregator = env_endpoint[:-9].rstrip('/')
+                else:
+                    env_aggregator = env_endpoint.rstrip('/')
+            
+        self.publisher_url = publisher_url or env_publisher or self.WALRUS_PUBLISHER_URL
+        self.aggregator_url = aggregator_url or env_aggregator or self.WALRUS_AGGREGATOR_URL
         self.last_blob_id: Optional[str] = None
         
         logger.info(f"🐋 WalrusPublisher initialized")
@@ -57,18 +78,33 @@ class WalrusPublisher:
             logger.debug(f"  Config preview: {json.dumps(config, indent=2)[:200]}...")
             
             # Prepare request payload
-            # Walrus expects the data as form-encoded or as raw bytes
             headers = {
                 "Content-Type": "application/json"
             }
             
-            # Make PUT request to Walrus publisher
+            url = self.publisher_url
+            if "?" not in url:
+                url = f"{url}?epochs=5"
+            
+            logger.info(f"📤 Sending PUT to: {url}")
             response = requests.put(
-                self.publisher_url,
+                url,
                 data=config_json,
                 headers=headers,
                 timeout=30
             )
+            
+            # Fallback to public testnet publisher if user's endpoint 404s/405s
+            if (response.status_code == 404 or response.status_code == 405) and self.publisher_url != self.WALRUS_PUBLISHER_URL:
+                logger.warning(f"⚠️  Primary publisher returned {response.status_code}. Falling back to public Walrus testnet publisher...")
+                fallback_url = f"{self.WALRUS_PUBLISHER_URL}?epochs=5"
+                logger.info(f"📤 Sending PUT to fallback: {fallback_url}")
+                response = requests.put(
+                    fallback_url,
+                    data=config_json,
+                    headers=headers,
+                    timeout=30
+                )
             
             logger.debug(f"  Response status: {response.status_code}")
             logger.debug(f"  Response headers: {dict(response.headers)}")
@@ -79,10 +115,11 @@ class WalrusPublisher:
                     logger.debug(f"  Response body: {response_data}")
                     
                     # Extract Blob ID from response
-                    # Structure may vary - try multiple paths
                     blob_id = (
                         response_data.get("blobId") or
                         response_data.get("blob_id") or
+                        response_data.get("newlyCreated", {}).get("blobObject", {}).get("blobId") or
+                        response_data.get("alreadyCertified", {}).get("blobObject", {}).get("blobId") or
                         response_data.get("newElement", {}).get("blobId") or
                         response_data.get("newElement", {}).get("blob_id")
                     )

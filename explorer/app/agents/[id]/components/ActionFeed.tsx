@@ -9,6 +9,7 @@ import {
   Cpu,
   ShieldAlert,
   BadgePlus,
+  ArrowDownLeft,
 } from "lucide-react";
 
 interface ActionItem {
@@ -81,6 +82,8 @@ export default function ActionFeed({
     switch (type.toUpperCase()) {
       case "SWAP":
         return <ArrowRight size={14} />;
+      case "TRANSFER":
+        return <ArrowDownLeft size={14} />;
       case "COMPUTE":
         return <Cpu size={14} />;
       case "MINT":

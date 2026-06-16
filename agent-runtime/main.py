@@ -7,6 +7,12 @@ import time
 from pathlib import Path
 from datetime import datetime
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).parent / ".env")
+except ImportError:
+    pass
+
 # Fix Unicode encoding for Windows
 if sys.platform == "win32":
     import io
@@ -56,7 +62,7 @@ def generate_operator_address() -> str:
     return operator_address
 
 
-def publish_skill_config() -> str:
+def publish_skill_config(force: bool = False) -> str:
     """
     Publish skill configuration to Walrus.
     
@@ -67,7 +73,7 @@ def publish_skill_config() -> str:
     # Try to load existing blob ID
     blob_file = Path(__file__).parent / ".blob_id"
     
-    if blob_file.exists():
+    if not force and blob_file.exists():
         blob_id = blob_file.read_text().strip()
         print(f"✓ Using published blob: {blob_id}\n")
         return blob_id
@@ -76,6 +82,19 @@ def publish_skill_config() -> str:
     config_file = Path(__file__).parent / "config" / "skill_schema.json"
     
     if config_file.exists():
+        try:
+            from src.walrus_publish import WalrusPublisher
+            publisher = WalrusPublisher()
+            blob_id = publisher.publish_skill_config_from_file(config_file)
+            if blob_id and not blob_id.startswith("MOCK_BLOB_"):
+                blob_file.write_text(blob_id)
+                print(f"✓ Published skill config to Walrus")
+                print(f"   Skill: {config_file.name}")
+                print(f"   Blob ID: {blob_id}\n")
+                return blob_id
+        except Exception as e:
+            print(f"✖ Failed to publish to Walrus: {e}")
+            
         import json
         with open(config_file) as f:
             config = json.load(f)
@@ -85,7 +104,7 @@ def publish_skill_config() -> str:
         
         blob_file.write_text(mock_blob_id)
         
-        print(f"✓ Published skill config")
+        print(f"✓ Published skill config (mock fallback)")
         print(f"   Skill: {config.get('skill_name')}")
         print(f"   Blob ID: {mock_blob_id}\n")
         
@@ -281,7 +300,7 @@ def main():
             return 0
         
         elif command == "publish-skill":
-            blob_id = publish_skill_config()
+            blob_id = publish_skill_config(force=True)
             print(f"✅ Ready to share with Joshua:")
             print(f"   WALRUS_BLOB_ID={blob_id}\n")
             return 0

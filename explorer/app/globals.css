@@ -10,6 +10,11 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-open-sans);
   --font-mono: var(--font-dm-sans);
+  --color-brand: #0241ff;
+  --color-secondary: #7e808a;
+  --color-inactive: #27272a;
+  --color-subtle: #212124;
+  --color-modal: rgba(24, 24, 26, 0.8);
 }
 
 body {

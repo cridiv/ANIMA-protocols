@@ -24,7 +24,7 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalExceptionFilter());
 
   const port = process.env.PORT ?? 5000;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   logger.log(`ANIMA backend listening on http://localhost:${port}`);
 }
 bootstrap();

@@ -184,25 +184,49 @@ export async function handleAgentActionExecuted(client: SuiClient, event: any) {
 
   console.log(`[Action Event] Agent ID: ${anima_id}, Swapped: ${amount_swapped}`);
 
+  let actionType = "SWAP";
+  let targetProtocol = "DeepBook";
+
+  try {
+    const txBlock = await client.getTransactionBlock({
+      digest: txDigest,
+      options: { showInput: true },
+    });
+
+    const txCommands = txBlock.transaction?.data?.transaction?.transactions || [];
+    for (const cmd of txCommands) {
+      if (cmd.MoveCall) {
+        const { module: mod, function: func } = cmd.MoveCall;
+        if (mod === "wallet" && (func === "extract_funds_for_action" || func === "deposit_funds")) {
+          actionType = "TRANSFER";
+          targetProtocol = "Sui Network";
+          break;
+        }
+      }
+    }
+  } catch (err) {
+    console.error(`Error inspecting transaction block for action type:`, err);
+  }
+
   try {
     // Insert action
     const { error } = await supabase.from("agent_actions").insert({
       agent_object_id: anima_id,
       tx_digest: txDigest,
-      action_type: "SWAP",
+      action_type: actionType,
       amount: parseInt(amount_swapped || "0"),
       from_token: "SUI",
       to_token: "SUI", // Or detail if it's token swaps
-      target_protocol: "DeepBook",
+      target_protocol: targetProtocol,
       status: "success",
       checkpoint: checkpoint,
       timestamp: new Date(),
     });
 
     if (error) {
-      console.error(`Error logging swap action for ${anima_id}:`, error);
+      console.error(`Error logging action for ${anima_id}:`, error);
     } else {
-      console.log(`Logged swap action for ${anima_id} in Supabase`);
+      console.log(`Logged ${actionType} action for ${anima_id} in Supabase`);
       // Update agent state and global stats
       await syncAgentState(client, anima_id);
       await syncGlobalStats();

@@ -59,12 +59,13 @@ const Navbar = () => {
       <nav className="ml-8 hidden md:flex max-header2:ml-4">
         {/* Blockchain Dropdown */}
         <div className="relative inline-block text-left">
-          <button
+          <Link
+            href="/"
             onClick={() => setIsBlockchainOpen(!isBlockchainOpen)}
             className="flex hover:text-[#a3c2ff]  cursor-pointer items-center rounded px-3 py-2 text-sm hover:text-brand"
           >
             Home
-          </button>
+          </Link>
         </div>
 
         {/* Validators Link */}
@@ -94,9 +95,8 @@ const Navbar = () => {
         <ConnectButton className="w-full primary-button inline-flex items-center justify-center gap-2 !rounded-full cursor-pointer hover:scale-95 px-5 py-3 text-sm font-medium !text-white transition-all hover:shadow-lg mt-2" />
 
         {/* Theme Toggle Button */}
-        <div className="pointer-events-auto  bg-[#6fa0ff]/15 px-4 py-2 rounded-full">
-          <Wifi className="inline-block text-green-400 h-4 w-4 mr-0.5 mb-0.5" />{" "}
-          Testnet
+        <div className="pointer-events-auto flex items-center gap-x-1 bg-[#6fa0ff]/15 px-4 py-2 rounded-full">
+          <Wifi className="inline-block text-green-400 h-4 w-4" /> Testnet
         </div>
 
         {/* Menu Button */}
@@ -112,14 +112,15 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="absolute top-[72px] left-0 right-0 bg-background md:hidden border-b shadow-lg">
+        <div className="z-50 absolute top-[72px] left-0 right-0 bg-background md:hidden border-b shadow-lg">
           <nav className="flex flex-col px-4 py-4 gap-y-2">
-            <button
+            <Link
+              href="/"
               onClick={() => setIsBlockchainOpen(!isBlockchainOpen)}
               className="flex hover:text-[#a3c2ff] cursor-pointer items-center rounded px-3 py-2 text-sm hover:text-brand text-left w-full"
             >
               Home
-            </button>
+            </Link>
             <Link
               className="rounded hover:text-[#a3c2ff] px-3 py-2 hover:text-brand text-sm block"
               href="/agents"

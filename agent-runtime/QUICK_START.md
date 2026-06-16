@@ -3,19 +3,24 @@
 ## 🚀 IMMEDIATE ACTIONS
 
 ### 1. Generate Your Operator Address (Share with Joshua)
+
 ```bash
 cd agent-runtime
 python main.py generate-address
 ```
+
 **Output:** `0x69f68c342533e129d4fd1b3ebd0f817be4fcb923`
 
 ### 2. Publish Your Skill to Walrus (Share with Joshua)
+
 ```bash
 python main.py publish-skill
 ```
+
 **Output:** `WALRUS_DEEPBOOK_HIGHFREQ_ARBITRAGE_V1`
 
 ### 3. Share These Two Values with Joshua
+
 ```
 OPERATOR_PUBLIC_ADDRESS=0x69f68c342533e129d4fd1b3ebd0f817be4fcb923
 WALRUS_BLOB_ID=WALRUS_DEEPBOOK_HIGHFREQ_ARBITRAGE_V1
@@ -45,6 +50,7 @@ python main.py
 ## 📋 WHAT'S BEEN BUILT
 
 ### ✅ Complete
+
 - [x] Secure local keypair generation (`src/keys.py`)
 - [x] Skill configuration blueprint (`config/skill_schema.json`)
 - [x] Orchestrator daemon loop (`src/orchestrator.py`)
@@ -53,6 +59,7 @@ python main.py
 - [x] CLI entry points (`main.py`, `anima.py`)
 
 ### 📂 Key Files
+
 ```
 agent-runtime/
 ├── src/keys.py                    # Your keypair manager
@@ -80,17 +87,20 @@ agent-runtime/
 ## 🎯 NEXT MILESTONE: Joshua's Handoff
 
 **What Joshua will do:**
+
 1. Take your `OPERATOR_PUBLIC_ADDRESS` and `WALRUS_BLOB_ID`
 2. Call the ANIMA smart contract to mint your agent
 3. Provide you with `ANIMA_OBJECT_ID`
 
 **Then you run:**
+
 ```bash
 set ANIMA_OBJECT_ID=<from Joshua>
 python main.py
 ```
 
 The daemon will:
+
 - Connect to Sui testnet
 - Monitor prices
 - Fire BUY_SIGNAL every 45 seconds
@@ -108,6 +118,7 @@ python main.py
 ```
 
 Watch it fire BUY_SIGNAL every 10 seconds. Each signal shows:
+
 - Current price
 - Transaction submission status
 - Full uptime tracking
@@ -117,11 +128,13 @@ Watch it fire BUY_SIGNAL every 10 seconds. Each signal shows:
 ## 📊 PRODUCTION READINESS
 
 **Ready for Joshua:**
+
 - ✓ Address generation
 - ✓ Skill publishing
 - ✓ Mock orchestrator loop
 
 **Remaining (Post-Hackathon):**
+
 - Real ML model integration
 - DeepBook V3 price fetching
 - Sui RPC integration
@@ -133,6 +146,7 @@ Watch it fire BUY_SIGNAL every 10 seconds. Each signal shows:
 ## 🆘 TROUBLESHOOTING
 
 **Issue: "No operator address found"**
+
 ```bash
 python main.py generate-address
 ```

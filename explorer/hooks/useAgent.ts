@@ -13,6 +13,7 @@ export interface SkillItem {
     dailySpendCap: number;
   };
   triggerCondition: string;
+  rawConfig?: any;
 }
 
 export interface AgentDetails {
@@ -102,25 +103,80 @@ export function useAgent(agentId: string) {
             if (obj.data && obj.data.content && obj.data.content.dataType === "moveObject") {
               const fFields = obj.data.content.fields as any;
               const nameObj = fFields.name;
-              const skillName = typeof nameObj === "string" ? nameObj : (nameObj.fields?.name || nameObj.name || "unknown");
+              const skillName = typeof nameObj === "string" 
+                ? nameObj 
+                : (nameObj.fields?.pos0 || nameObj.fields?.dummy_field || nameObj.fields?.name || nameObj.name || "unknown");
               const walrusBlobId = fFields.value;
+              const finalBlobId = typeof walrusBlobId === "string" ? walrusBlobId.trim() : "";
 
-              // Mock metadata details for UI richness since only the blob ID is on-chain
-              skills.push({
-                name: skillName,
-                walrusBlobId: walrusBlobId,
-                description: skillName === "volatility_arbitrage"
-                  ? "Performs high-frequency cross-pool arbitrage swaps on DeepBook when price spread deviates."
-                  : "Monitors SUI token price feeds off-chain and executes trades based on technical indicators.",
-                version: "1.0.0",
-                riskLimits: {
-                  maxSpendPerAction: skillName === "volatility_arbitrage" ? 25.0 : 10.0,
-                  dailySpendCap: skillName === "volatility_arbitrage" ? 150.0 : 50.0,
-                },
-                triggerCondition: skillName === "volatility_arbitrage"
-                  ? "DeepBook Pool price spreads exceed 1.2%"
-                  : "Price drops below $0.40 USD",
-              });
+              if (!finalBlobId || finalBlobId === "unavailable") {
+                skills.push({
+                  name: skillName,
+                  walrusBlobId: "unavailable",
+                  description: "Skill metadata not found or unavailable.",
+                  version: "unknown",
+                  riskLimits: {
+                    maxSpendPerAction: 0,
+                    dailySpendCap: 0,
+                  },
+                  triggerCondition: "Unavailable",
+                  rawConfig: null,
+                });
+                continue;
+              }
+
+              try {
+                const fetchUrl = `https://aggregator.walrus-testnet.walrus.space/v1/blobs/${finalBlobId}`;
+                const res = await fetch(fetchUrl);
+                if (!res.ok) {
+                  throw new Error(`Failed to fetch blob: ${res.statusText}`);
+                }
+                const data = await res.json();
+
+                const maxSpend = data.execution_constraints?.max_spend_per_ptb_mist 
+                  ? Number(data.execution_constraints.max_spend_per_ptb_mist) / 1_000_000_000 
+                  : 0;
+                const dailyCap = data.execution_constraints?.max_daily_loss_mist 
+                  ? Number(data.execution_constraints.max_daily_loss_mist) / 1_000_000_000 
+                  : 0;
+
+                let triggerCondition = "Active";
+                if (data.model_telemetry) {
+                  const telemetry = data.model_telemetry;
+                  if (telemetry.min_confidence_threshold !== undefined && data.data_sources?.price_feed) {
+                    triggerCondition = `Confidence > ${telemetry.min_confidence_threshold}% via ${data.data_sources.price_feed}`;
+                  } else if (telemetry.min_confidence_threshold !== undefined) {
+                    triggerCondition = `Confidence > ${telemetry.min_confidence_threshold}%`;
+                  }
+                }
+
+                skills.push({
+                  name: data.skill_name || skillName,
+                  walrusBlobId: finalBlobId,
+                  description: data.description || "No description provided.",
+                  version: data.version || "1.0.0",
+                  riskLimits: {
+                    maxSpendPerAction: maxSpend,
+                    dailySpendCap: dailyCap,
+                  },
+                  triggerCondition: triggerCondition,
+                  rawConfig: data,
+                });
+              } catch (fetchErr) {
+                console.error(`Error fetching Walrus blob ${finalBlobId}:`, fetchErr);
+                skills.push({
+                  name: skillName,
+                  walrusBlobId: finalBlobId,
+                  description: "Skill metadata not found or unavailable.",
+                  version: "unknown",
+                  riskLimits: {
+                    maxSpendPerAction: 0,
+                    dailySpendCap: 0,
+                  },
+                  triggerCondition: "Unavailable",
+                  rawConfig: null,
+                });
+              }
             }
           }
         }

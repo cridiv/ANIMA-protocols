@@ -8,7 +8,7 @@ import { type EnokiWallet } from "@mysten/enoki";
 
 function ConnectBtn() {
   const currentAccount = useCurrentAccount();
-  const { mutate: connect } = useConnectWallet();
+  const { mutateAsync: connect } = useConnectWallet();
 
   const wallets = useWallets().filter(isEnokiWallet);
   const walletsByProvider = wallets.reduce(
@@ -27,8 +27,15 @@ function ConnectBtn() {
       {googleWallet ? (
         <button
           className="w-full primary-button inline-flex items-center justify-center gap-2 rounded-full cursor-pointer hover:scale-95 px-5 py-3 text-sm font-medium text-white transition-all hover:shadow-lg mt-2"
-          onClick={() => {
-            connect({ wallet: googleWallet });
+          onClick={async () => {
+            try {
+              await connect({ wallet: googleWallet });
+            } catch (err: any) {
+              console.error("Connect error:", err);
+              if (err.errors) {
+                console.error("Enoki Errors:", JSON.stringify(err.errors, null, 2));
+              }
+            }
           }}
         >
           Sign in with Google
@@ -39,3 +46,4 @@ function ConnectBtn() {
 }
 
 export default ConnectBtn;
+

@@ -91,8 +91,7 @@ export default function AgentProfilePage() {
     // Resolve capability ID
     const capId = ownerCapObjectId || agent.ownerCapId;
     if (!capId) {
-      alert("Missing OwnerCap object ID. Make sure it is indexed in Supabase or held in your wallet.");
-      return;
+      throw new Error("Missing OwnerCap object ID. Make sure it is indexed in Supabase or held in your wallet.");
     }
 
     setIsExecutingKill(true);
@@ -108,11 +107,9 @@ export default function AgentProfilePage() {
 
       const response = await signAndExecuteTransaction({ transaction: tx });
       await suiClient.waitForTransaction({ digest: response.digest });
-      alert("Emergency Hatch triggered. Agent is PAUSED and funds have been returned to your wallet.");
-      window.location.reload();
     } catch (err: any) {
       console.error("Kill switch failed:", err);
-      alert(err.message || "Failed to trigger emergency kill switch.");
+      throw new Error(err.message || "Failed to trigger emergency kill switch.");
     } finally {
       setIsExecutingKill(false);
     }
@@ -279,6 +276,7 @@ export default function AgentProfilePage() {
                   hasOwnerCap={hasOwnerCap}
                   onConfirmKill={handleConfirmKill}
                   isExecuting={isExecutingKill}
+                  isPaused={agent.isPaused}
                 />
               </div>
             )}
