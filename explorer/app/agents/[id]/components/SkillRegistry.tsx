@@ -21,6 +21,7 @@ interface SkillItem {
     dailySpendCap: number;
   };
   triggerCondition: string;
+  rawConfig?: any;
 }
 
 interface SkillRegistryProps {
@@ -88,7 +89,9 @@ export default function SkillRegistry({
         <div className="flex flex-col gap-4">
           {skills.map((skill) => {
             const isExpanded = expandedSkill === skill.name;
-            const truncatedBlob = `${skill.walrusBlobId.slice(0, 8)}...${skill.walrusBlobId.slice(-8)}`;
+            const truncatedBlob = skill.walrusBlobId && skill.walrusBlobId !== "unavailable"
+              ? `${skill.walrusBlobId.slice(0, 8)}...${skill.walrusBlobId.slice(-8)}`
+              : "unavailable";
 
             return (
               <div
@@ -143,29 +146,33 @@ export default function SkillRegistry({
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCopy(skill.walrusBlobId, skill.name);
-                          }}
-                          className="p-1.5 hover:text-background transition-colors hover:bg-background/5 rounded"
-                          title="Copy Blob ID"
-                        >
-                          {copiedBlobId === skill.name ? (
-                            <Check size={13} className="text-emerald-400" />
-                          ) : (
-                            <Copy size={13} />
-                          )}
-                        </button>
-                        <a
-                          href={`https://walrus.xyz/blob/${skill.walrusBlobId}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1.5 hover:text-background transition-colors hover:bg-background/5 rounded flex items-center"
-                          title="View on Walrus"
-                        >
-                          <ExternalLink size={13} />
-                        </a>
+                        {skill.walrusBlobId && skill.walrusBlobId !== "unavailable" && (
+                          <>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCopy(skill.walrusBlobId, skill.name);
+                              }}
+                              className="p-1.5 hover:text-background transition-colors hover:bg-background/5 rounded"
+                              title="Copy Blob ID"
+                            >
+                              {copiedBlobId === skill.name ? (
+                                <Check size={13} className="text-emerald-400" />
+                              ) : (
+                                <Copy size={13} />
+                              )}
+                            </button>
+                            <a
+                              href={`https://walruscan.com/testnet/blob/${skill.walrusBlobId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1.5 hover:text-background transition-colors hover:bg-background/5 rounded flex items-center"
+                              title="View on Walruscan"
+                            >
+                              <ExternalLink size={13} />
+                            </a>
+                          </>
+                        )}
                       </div>
                     </div>
 
@@ -193,6 +200,18 @@ export default function SkillRegistry({
                         </div>
                       </div>
                     </div>
+
+                    {/* Raw JSON display */}
+                    {skill.rawConfig && (
+                      <div className="flex flex-col gap-1.5 mt-2">
+                        <span className="text-[9px] uppercase tracking-wider text-gray-500 font-semibold">
+                          Raw Storage manifest parameters
+                        </span>
+                        <pre className="p-3 bg-black/40 rounded-lg border border-background/5 text-[10px] font-mono text-emerald-400 overflow-x-auto max-h-[200px] scrollbar-thin">
+                          {JSON.stringify(skill.rawConfig, null, 2)}
+                        </pre>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
