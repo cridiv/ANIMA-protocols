@@ -31,7 +31,7 @@ class OrchestratorConfig:
         self.poll_interval = int(os.getenv("POLL_INTERVAL", "3"))
         self.enable_mock_mode = os.getenv("ENABLE_MOCK_MODE", "false").lower() == "true"
         self.mock_signal_interval = int(os.getenv("MOCK_SIGNAL_INTERVAL", "45"))
-        self.model_path = Path(os.getenv("MODEL_PATH", "models/predictor.pkl"))
+        self.model_path = Path(os.getenv("MODEL_PATH", "src/predictor.py"))
 
 
 class OrchestratorState:
