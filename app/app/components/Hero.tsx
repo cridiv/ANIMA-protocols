@@ -15,14 +15,14 @@ const Hero = () => {
 
         {/* Main Heading */}
         <h1 className="leading-1.4 text-center tracking-[-0.03em] mt-6 text-[32px] font-[500] md:text-[64px] md:font-[400] md:mt-10 md:leading-0.8 lg:text-[72px] xl:text-[80px]">
-          The Agentic Identity Protocol for Sui
+          Agent Native Identity & Machine Autonomy{" "}
         </h1>
 
         {/* Description */}
         <div className="text-[#4C4C4C] text-center !leading-1.4 tracking-[-0.03em] mt-4 text-md md:max-w-[600px] md:text-lg md:mt-6 lg:mt-6 lg:text-xl">
           <h2>
-            Deploy intelligent agents with verifiable credentials, seamless Sui
-            integration, and autonomous transaction execution at scale.
+            Giving AI agents a soul on-chain. First-class agent identity,
+            accountability, and autonomy on Sui.
           </h2>
         </div>
 
