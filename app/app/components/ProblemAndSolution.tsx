@@ -212,12 +212,12 @@ export default function ProblemAndSolution() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="border border-zinc-200 bg-white rounded-2xl shadow-sm overflow-hidden"
+            className="border border-[#0241ff] bg-white rounded-2xl shadow-sm overflow-hidden"
           >
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-zinc-50/80 border-b border-zinc-200 text-zinc-500 text-xs font-semibold uppercase tracking-wider">
+                <thead className="bg-[#0241ff]">
+                  <tr className="bg-zinc-50/80 border-b border-[#0241ff] text-zinc-500 text-xs font-semibold uppercase tracking-wider">
                     <th className="py-4 px-6 font-medium">
                       Comparison Criteria
                     </th>
@@ -235,7 +235,7 @@ export default function ProblemAndSolution() {
                       key={idx}
                       onMouseEnter={() => setHoveredRow(idx)}
                       onMouseLeave={() => setHoveredRow(null)}
-                      className={`border-b border-zinc-100 last:border-0 transition-colors ${
+                      className={`border-b border-[#0241ff] last:border-0 transition-colors ${
                         hoveredRow === idx ? "bg-zinc-50/50" : ""
                       }`}
                     >
@@ -260,7 +260,7 @@ export default function ProblemAndSolution() {
         </div>
 
         {/* SECTION 4: DEMO DAY PITCH QUOTE */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
@@ -289,7 +289,7 @@ export default function ProblemAndSolution() {
               Demo Day Technical Takeaway
             </div>
           </div>
-        </motion.div>
+        </motion.div> */}
       </div>
     </section>
   );

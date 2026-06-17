@@ -37,5 +37,24 @@ h1, h2, h3, h4 {
 }
 
 .secondary-bg {
-    background: linear-gradient(135deg, #171717, #6fa0ff 45%, #0241ff);
+    background: linear-gradient(135deg, #171717, #1563ff 45%, #0241ff);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c9cccf;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #959799;
 }

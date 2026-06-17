@@ -12,6 +12,7 @@ import {
   KeyRound,
   ArrowRight,
 } from "lucide-react";
+import Aurora from "./animations/Aurora";
 
 // Types for the comparison cognitive model
 interface ComparisonDimension {
@@ -168,92 +169,103 @@ export default function IntroducingNFA() {
         </div>
 
         {/* Cognitive Model: NFT vs NFA Paradigm shift */}
-        <div className="">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="border border-zinc-200 bg-white/70 backdrop-blur-md rounded-3xl p-6 md:p-10 shadow-sm"
-          >
-            <div className="text-center max-w-[600px] mx-auto mb-10">
-              <h3 className="text-2xl md:text-3xl font-normal tracking-tight mb-3">
-                NFTs vs. NFAs : The Paradigm Shift
-              </h3>
-              <p className="text-zinc-500 text-sm md:text-base font-light">
-                Understand how Non-Fungible Agents evolve the concept of
-                on-chain digital ownership into dynamic autonomous execution.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-              {/* Interactive Dimension Selector */}
-              <div className="lg:col-span-4 flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 scrollbar-none border-b lg:border-b-0 lg:border-r border-zinc-200 pr-0 lg:pr-6">
-                {dimensions.map((dim) => (
-                  <button
-                    key={dim.id}
-                    onClick={() => setActiveDimension(dim.id)}
-                    className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap cursor-pointer w-full text-left ${
-                      activeDimension === dim.id
-                        ? "bg-[#0241ff] text-white shadow-md shadow-[#0241ff]/10"
-                        : "hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900"
-                    }`}
-                  >
-                    {dim.icon}
-                    {dim.title}
-                  </button>
-                ))}
+        <div className="relative overflow-hidden bg-[#0241ff] rounded-3xl text-white shadow-lg border border-[#0241ff]/20">
+          {/* Safe visual background elements: abstract glows and soft shapes */}
+          <div className="absolute inset-0 pointer-events-none z-0">
+            <Aurora
+              colorStops={["#000080", "#000080", "#000080"]}
+              blend={0.88}
+              amplitude={1.0}
+              speed={0.5}
+            />
+          </div>
+          <div className="relative z-10 w-full">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="border border-zinc-200 bg-white/5 backdrop-blur-md rounded-3xl p-6 md:p-10 shadow-sm"
+            >
+              <div className="text-center max-w-[600px] mx-auto mb-10">
+                <h3 className="text-2xl md:text-3xl font-normal tracking-tight mb-3">
+                  NFTs vs. NFAs : The Paradigm Shift
+                </h3>
+                <p className="text-white/90 text-sm md:text-base font-light">
+                  Understand how Non-Fungible Agents evolve the concept of
+                  on-chain digital ownership into dynamic autonomous execution.
+                </p>
               </div>
 
-              {/* Comparison Details Panel */}
-              <div className="lg:col-span-8 flex flex-col justify-center min-h-[260px] lg:pl-6">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={activeDimension}
-                    initial={{ opacity: 0, x: 15 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -15 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-8"
-                  >
-                    {/* Left: NFT Column */}
-                    <div className="p-6 rounded-2xl border border-dashed border-zinc-200 bg-zinc-50/50 flex flex-col gap-4">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-zinc-400" />
-                        <span className="text-xs uppercase tracking-wider text-zinc-500 font-semibold">
-                          Traditional NFT
-                        </span>
-                      </div>
-                      <div className="text-sm font-semibold text-zinc-800">
-                        {currentDimension.nftHighlight}
-                      </div>
-                      <p className="text-zinc-500 text-sm font-light leading-relaxed">
-                        {currentDimension.nftText}
-                      </p>
-                    </div>
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                {/* Interactive Dimension Selector */}
+                <div className="lg:col-span-4 flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 scrollbar-none border-b lg:border-b-0 lg:border-r border-black pr-0 lg:pr-6">
+                  {dimensions.map((dim) => (
+                    <button
+                      key={dim.id}
+                      onClick={() => setActiveDimension(dim.id)}
+                      className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap cursor-pointer w-full text-left ${
+                        activeDimension === dim.id
+                          ? "bg-[#0241ff] text-white shadow-md shadow-[#0241ff]/10"
+                          : "hover:bg-[#6fa0ff] bg-white text-black hover:text-zinc-900"
+                      }`}
+                    >
+                      {dim.icon}
+                      {dim.title}
+                    </button>
+                  ))}
+                </div>
 
-                    {/* Right: NFA Column */}
-                    <div className="p-6 rounded-2xl border border-blue-100 bg-blue-50/10 flex flex-col gap-4 relative overflow-hidden">
-                      <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-xl pointer-events-none" />
+                {/* Comparison Details Panel */}
+                <div className="lg:col-span-8 flex flex-col justify-center min-h-[260px] lg:pl-6">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={activeDimension}
+                      initial={{ opacity: 0, x: 15 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -15 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="grid grid-cols-1 md:grid-cols-2 gap-8"
+                    >
+                      {/* Left: NFT Column */}
+                      <div className="p-6 rounded-2xl border border-dashed border-zinc-200 bg-white flex flex-col gap-4">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-zinc-400" />
+                          <span className="text-xs uppercase tracking-wider text-zinc-500 font-semibold">
+                            Traditional NFT
+                          </span>
+                        </div>
+                        <div className="text-sm font-semibold text-zinc-800">
+                          {currentDimension.nftHighlight}
+                        </div>
+                        <p className="text-zinc-500 text-sm font-light leading-relaxed">
+                          {currentDimension.nftText}
+                        </p>
+                      </div>
 
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-[#0241ff] animate-ping" />
-                        <span className="text-xs uppercase tracking-wider text-[#0241ff] font-semibold">
-                          Active NFA
-                        </span>
+                      {/* Right: NFA Column */}
+                      <div className="p-6 rounded-2xl border border-blue-100 bg-white flex flex-col gap-4 relative overflow-hidden">
+                        <div className="absolute z-30 top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-xl pointer-events-none" />
+
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-[#0241ff] animate-ping" />
+                          <span className="text-xs uppercase tracking-wider text-[#0241ff] font-semibold">
+                            Active NFA
+                          </span>
+                        </div>
+                        <div className="text-sm font-semibold text-[#0241ff]">
+                          {currentDimension.nfaHighlight}
+                        </div>
+                        <p className="text-zinc-600 text-sm font-light leading-relaxed">
+                          {currentDimension.nfaText}
+                        </p>
                       </div>
-                      <div className="text-sm font-semibold text-[#0241ff]">
-                        {currentDimension.nfaHighlight}
-                      </div>
-                      <p className="text-zinc-600 text-sm font-light leading-relaxed">
-                        {currentDimension.nfaText}
-                      </p>
-                    </div>
-                  </motion.div>
-                </AnimatePresence>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
         <div />
       </div>
