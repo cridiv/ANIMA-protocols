@@ -1,3 +1,3 @@
-Package ID: 0x63b6429339342dd64edd48c56420983c1dd37b4d8e573123e051a4cf52a092a1
-Upgrade Capability ID: 0x198e18442efd3d9dc78cabfeed396b76af4df94a722fc9a70487cf14b5472614
+Package ID: 0x5f6681ebeff7b6a1a1f333ba20842d47ed822f39e3ca9d06de3a69f2282e6eca
+Upgrade Capability ID: 0x02454ec26793d6f02d4314d8082b69f8024af6d4e8b684cc9f5f2ca2d2e9248b
 Deployed Modules: events, protocol, skill_registry, wallet.

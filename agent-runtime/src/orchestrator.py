@@ -1,9 +1,11 @@
 """Orchestrator daemon loop - central coordination engine for ANIMA agent runtime."""
 
 import os
+import sys
 import time
 import logging
 import json
+import subprocess
 from typing import Optional, Dict, Any
 from datetime import datetime
 from pathlib import Path
@@ -17,6 +19,48 @@ from src.monitor import PriceMonitor
 from src.model_manager import ModelManager
 
 logger = logging.getLogger(__name__)
+
+
+def auto_fund_operator(operator_address: str):
+    """
+    Auto-funds the operator address from the local active client address if balance is low.
+    """
+    cmd_bal = ["sui", "client", "balance", operator_address, "--json"]
+    try:
+        is_windows = sys.platform.startswith('win')
+        res_bal = subprocess.run(cmd_bal, capture_output=True, text=True, shell=is_windows)
+        has_balance = False
+        if res_bal.returncode == 0:
+            try:
+                bal_data = json.loads(res_bal.stdout)
+                if isinstance(bal_data, list) and len(bal_data) > 0:
+                    coins_list = bal_data[0]
+                    for item in coins_list:
+                        if item.get("coinType") == "0x2::sui::SUI":
+                            total_bal = int(item.get("totalBalance", 0))
+                            if total_bal >= 10000000: # 0.01 SUI
+                                has_balance = True
+                                break
+            except Exception:
+                pass
+        
+        if not has_balance:
+            logger.warning(f"⚠️  Operator address {operator_address} has low or zero gas balance.")
+            logger.info("⚡ Auto-funding operator address with 0.05 SUI from active client address...")
+            
+            cmd_fund = [
+                "sui", "client", "ptb",
+                "--split-coins", "gas", "[50000000]",
+                "--assign", "new_coins",
+                "--transfer-objects", "[new_coins.0]", f"@{operator_address}"
+            ]
+            res_fund = subprocess.run(cmd_fund, capture_output=True, text=True, shell=is_windows)
+            if res_fund.returncode == 0:
+                logger.info("✓ Successfully funded operator address with 0.05 SUI for gas!\n")
+            else:
+                logger.error(f"✖ Failed to fund operator address:\nStdout: {res_fund.stdout}\nStderr: {res_fund.stderr}\n")
+    except Exception as e:
+        logger.error(f"✖ Error during auto-funding check: {e}")
 
 
 class OrchestratorConfig:
@@ -432,8 +476,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-        self.mock_signal_interval = int(os.getenv("MOCK_SIGNAL_INTERVAL", "45"))  # seconds
-        self.backend_api_url = os.getenv("BACKEND_API_URL", "http://localhost:3000")
 
 
 class OrchestratorState:
@@ -584,18 +626,70 @@ class AnimaOrchestrator:
             logger.info(f"🚨 Decision engine fired: Executing atomic strategy block...")
             logger.info(f"   Signal: {signal}")
             logger.info(f"   Price: ${self.state.price_history[-1]:.4f}" if self.state.price_history else "")
+
+            recipient = "0x2fc456a94bd287614dbd0f14b1c435c574008d62d68dc63299f867ef72bd0b18"
+            amount = 20000000  # 0.02 SUI in MIST
             
-            # TODO: Implement actual PTB signing and submission
-            # 1. Fetch operator's private key from local storage
-            # 2. Build transaction block for the specific trade
-            # 3. Sign with Ed25519 keypair
-            # 4. Submit to Sui network
-            # 5. Poll for confirmation
+            package_id = os.getenv("SUI_PACKAGE_ID", "0x5f6681ebeff7b6a1a1f333ba20842d47ed822f39e3ca9d06de3a69f2282e6eca")
+            agent_id = self.config.anima_object_id or os.getenv("AGENT_ID") or "0xd4177df14064788426efb4e5e4661f98a06bc01b29df1447261454b2dd5ef0d4"
+            if agent_id == "awaiting_minting":
+                agent_id = "0xd4177df14064788426efb4e5e4661f98a06bc01b29df1447261454b2dd5ef0d4"
             
-            # For now, just log the execution
-            logger.info(f"   ✓ Transaction submitted (mock)")
+            logger.info(f"   🔗 Executing real on-chain SUI transfer from NFA vault...")
+            logger.info(f"   Agent ID: {agent_id}")
+            logger.info(f"   Target: {recipient}")
+            logger.info(f"   Amount: 0.02 SUI ({amount} MIST)")
             
-            return True
+            # Load operator address from file
+            addr_file = Path.home() / ".anima" / "keys" / "operator.addr"
+            operator_address = None
+            if addr_file.exists():
+                operator_address = addr_file.read_text().strip()
+            if not operator_address:
+                operator_address = self.operator_address or self.config.operator_address
+            
+            # Auto-fund operator if gas balance is low
+            auto_fund_operator(operator_address)
+            
+            is_windows = sys.platform.startswith('win')
+            cmd = [
+                "sui", "client", "ptb",
+                "--sender", f"@{operator_address}",
+                "--move-call", f"{package_id}::wallet::extract_funds_for_action", f"@{agent_id}", str(amount),
+                "--assign", "extracted_coin",
+                "--transfer-objects", "[extracted_coin]", f"@{recipient}",
+                "--json"
+            ]
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, shell=is_windows)
+            
+            if result.returncode == 0:
+                tx_data = {}
+                try:
+                    tx_data = json.loads(result.stdout)
+                except Exception:
+                    pass
+                
+                digest = None
+                if isinstance(tx_data, dict):
+                    digest = tx_data.get("digest")
+                elif isinstance(tx_data, list) and len(tx_data) > 0:
+                    digest = tx_data[0].get("digest")
+                
+                if digest:
+                    logger.info(f"   ✓ Transaction executed successfully on Sui Testnet!")
+                    logger.info(f"   Digest: {digest}")
+                    logger.info(f"   Explorer URL: https://suivision.xyz/txblock/{digest}")
+                else:
+                    logger.info(f"   ✓ Transaction submitted successfully (Raw output received)")
+                    logger.debug(f"   Output: {result.stdout}")
+                
+                return True
+            else:
+                logger.error(f"   ✖ Sui CLI PTB command failed with code {result.returncode}")
+                logger.error(f"   Stdout: {result.stdout}")
+                logger.error(f"   Stderr: {result.stderr}")
+                return False
         
         except Exception as e:
             logger.error(f"✖ Error executing trade: {e}")

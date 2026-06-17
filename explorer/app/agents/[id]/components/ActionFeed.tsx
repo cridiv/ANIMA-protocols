@@ -29,7 +29,7 @@ export default function ActionFeed({
   actions = [
     {
       agentId:
-        "0x63b6429339342dd64edd48c56420983c1dd37b4d8e573123e051a4cf52a092a1",
+        "0x5f6681ebeff7b6a1a1f333ba20842d47ed822f39e3ca9d06de3a69f2282e6eca",
       actionType: "SWAP",
       amount: "15500000000", // in MIST
       timestamp: Date.now() - 120000, // 2 minutes ago
@@ -37,7 +37,7 @@ export default function ActionFeed({
     },
     {
       agentId:
-        "0x63b6429339342dd64edd48c56420983c1dd37b4d8e573123e051a4cf52a092a1",
+        "0x5f6681ebeff7b6a1a1f333ba20842d47ed822f39e3ca9d06de3a69f2282e6eca",
       actionType: "COMPUTE",
       amount: "500000000", // in MIST
       timestamp: Date.now() - 3600000, // 1 hour ago
@@ -45,7 +45,7 @@ export default function ActionFeed({
     },
     {
       agentId:
-        "0x63b6429339342dd64edd48c56420983c1dd37b4d8e573123e051a4cf52a092a1",
+        "0x5f6681ebeff7b6a1a1f333ba20842d47ed822f39e3ca9d06de3a69f2282e6eca",
       actionType: "MINT",
       amount: "0",
       timestamp: Date.now() - 86400000, // 1 day ago

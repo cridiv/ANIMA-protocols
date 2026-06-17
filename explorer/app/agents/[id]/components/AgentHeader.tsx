@@ -11,7 +11,7 @@ interface AgentHeaderProps {
 
 export default function AgentHeader({
   name = "Atlas V1",
-  objectId = "0x63b6429339342dd64edd48c56420983c1dd37b4d8e573123e051a4cf52a092a1",
+  objectId = "0x5f6681ebeff7b6a1a1f333ba20842d47ed822f39e3ca9d06de3a69f2282e6eca",
   isPaused = false,
 }: AgentHeaderProps) {
   const [copied, setCopied] = useState(false);

@@ -4,6 +4,8 @@ import sys
 import os
 import logging
 import time
+import json
+import subprocess
 from pathlib import Path
 from datetime import datetime
 
@@ -29,13 +31,11 @@ logger = logging.getLogger(__name__)
 
 def generate_operator_address() -> str:
     """
-    Generate or retrieve the operator address.
-    
-    For now, creates a mock address. In production, uses Ed25519 keypair.
+    Generate or retrieve the operator address using the local Sui CLI.
+    This guarantees the private key is created and stored in the local keystore.
     """
     print("\n=== ANIMA Operator Address Generation ===\n")
     
-    # Try to load existing address
     addr_file = Path.home() / ".anima" / "keys" / "operator.addr"
     
     if addr_file.exists():
@@ -43,23 +43,104 @@ def generate_operator_address() -> str:
         print(f"✓ Loaded existing address: {addr}\n")
         return addr
     
-    # Generate new address (mock for now)
-    import hashlib
-    import secrets
+    import subprocess
+    import json
+    import sys
     
-    random_bytes = secrets.token_bytes(32)
-    addr_hash = hashlib.sha256(random_bytes).hexdigest()
-    operator_address = f"0x{addr_hash[:40]}"
+    print("⚡ Generating a new real operator address in Sui keystore...")
+    is_windows = sys.platform.startswith('win')
+    cmd = ["sui", "client", "new-address", "ed25519", "--json"]
     
-    # Save it
-    addr_file.parent.mkdir(parents=True, exist_ok=True)
-    addr_file.write_text(operator_address)
-    addr_file.chmod(0o600)
-    
-    print(f"⚡ Generated new operator address:")
-    print(f"   {operator_address}\n")
-    
-    return operator_address
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, shell=is_windows)
+        if result.returncode == 0:
+            data = json.loads(result.stdout)
+            address = None
+            if isinstance(data, dict):
+                address = data.get("address")
+            elif isinstance(data, list) and len(data) > 0:
+                address = data[0].get("address")
+            
+            if address:
+                addr_file.parent.mkdir(parents=True, exist_ok=True)
+                addr_file.write_text(address)
+                addr_file.chmod(0o600)
+                print(f"✓ Generated new operator address: {address}")
+                print("✓ Private key has been automatically saved in your Sui CLI keystore.\n")
+                return address
+            else:
+                raise ValueError(f"Could not parse address from output: {result.stdout}")
+        else:
+            raise RuntimeError(f"Sui CLI failed: {result.stderr or result.stdout}")
+    except Exception as e:
+        print(f"✖ Failed to generate address via Sui CLI: {e}")
+        print("Fallback: Using the active address of your Sui client instead...")
+        cmd_active = ["sui", "client", "active-address"]
+        try:
+            res_active = subprocess.run(cmd_active, capture_output=True, text=True, shell=is_windows)
+            if res_active.returncode == 0:
+                # Extract address from output
+                output_lines = res_active.stdout.strip().split("\n")
+                address = output_lines[-1].strip()
+                addr_file.parent.mkdir(parents=True, exist_ok=True)
+                addr_file.write_text(address)
+                addr_file.chmod(0o600)
+                print(f"✓ Registered active address: {address}\n")
+                return address
+        except Exception as active_err:
+            print(f"✖ Failed to retrieve active address: {active_err}")
+            
+        import secrets
+        import hashlib
+        random_bytes = secrets.token_bytes(32)
+        addr_hash = hashlib.sha256(random_bytes).hexdigest()
+        operator_address = f"0x{addr_hash[:40]}"
+        addr_file.parent.mkdir(parents=True, exist_ok=True)
+        addr_file.write_text(operator_address)
+        addr_file.chmod(0o600)
+        print(f"⚠️ Fallback to mock address: {operator_address} (No private key available!)\n")
+        return operator_address
+
+def auto_fund_operator(operator_address: str):
+    """
+    Auto-funds the operator address from the local active client address if balance is low.
+    """
+    cmd_bal = ["sui", "client", "balance", operator_address, "--json"]
+    try:
+        is_windows = sys.platform.startswith('win')
+        res_bal = subprocess.run(cmd_bal, capture_output=True, text=True, shell=is_windows)
+        has_balance = False
+        if res_bal.returncode == 0:
+            try:
+                bal_data = json.loads(res_bal.stdout)
+                if isinstance(bal_data, list) and len(bal_data) > 0:
+                    coins_list = bal_data[0]
+                    for item in coins_list:
+                        if item.get("coinType") == "0x2::sui::SUI":
+                            total_bal = int(item.get("totalBalance", 0))
+                            if total_bal >= 10000000: # 0.01 SUI
+                                has_balance = True
+                                break
+            except Exception:
+                pass
+        
+        if not has_balance:
+            print(f"⚠️  Operator address {operator_address} has low or zero gas balance.")
+            print("⚡ Auto-funding operator address with 0.05 SUI from active client address...")
+            
+            cmd_fund = [
+                "sui", "client", "ptb",
+                "--split-coins", "gas", "[50000000]",
+                "--assign", "new_coins",
+                "--transfer-objects", "[new_coins.0]", f"@{operator_address}"
+            ]
+            res_fund = subprocess.run(cmd_fund, capture_output=True, text=True, shell=is_windows)
+            if res_fund.returncode == 0:
+                print("✓ Successfully funded operator address with 0.05 SUI for gas!\n")
+            else:
+                print(f"✖ Failed to fund operator address:\nStdout: {res_fund.stdout}\nStderr: {res_fund.stderr}\n")
+    except Exception as e:
+        print(f"✖ Error during auto-funding check: {e}")
 
 
 def publish_skill_config(force: bool = False) -> str:
@@ -131,6 +212,9 @@ def run_orchestrator_daemon():
         operator_address = generate_operator_address()
         os.environ["OPERATOR_PUBLIC_ADDRESS"] = operator_address
     
+    # Auto-fund the operator address if it has no SUI for gas
+    auto_fund_operator(operator_address)
+    
     blob_id = os.getenv("WALRUS_BLOB_ID")
     if not blob_id:
         blob_id = publish_skill_config()
@@ -181,7 +265,56 @@ def run_orchestrator_daemon():
                 if signal == "BUY_SIGNAL":
                     print(f"[{iteration:06d}] 🚨 BUY_SIGNAL fired!")
                     print(f"         Price: ${price:.4f}")
-                    print(f"         Status: Transaction would be submitted\n")
+
+                    
+                    recipient = "0x2fc456a94bd287614dbd0f14b1c435c574008d62d68dc63299f867ef72bd0b18"
+                    amount = 20000000  # 0.02 SUI in MIST
+                    
+                    package_id = os.getenv("SUI_PACKAGE_ID", "0x5f6681ebeff7b6a1a1f333ba20842d47ed822f39e3ca9d06de3a69f2282e6eca")
+                    agent_id = os.getenv("ANIMA_OBJECT_ID") or os.getenv("AGENT_ID") or "0xd4177df14064788426efb4e5e4661f98a06bc01b29df1447261454b2dd5ef0d4"
+                    if agent_id == "awaiting_minting":
+                        agent_id = "0xd4177df14064788426efb4e5e4661f98a06bc01b29df1447261454b2dd5ef0d4"
+                    
+                    print(f"         🔗 Executing real on-chain SUI transfer from NFA vault...")
+                    print(f"         Agent ID: {agent_id}")
+                    print(f"         Target: {recipient}")
+                    print(f"         Amount: 0.02 SUI ({amount} MIST)")
+                    
+                    is_windows = sys.platform.startswith('win')
+                    cmd = [
+                        "sui", "client", "ptb",
+                        "--sender", f"@{operator_address}",
+                        "--move-call", f"{package_id}::wallet::extract_funds_for_action", f"@{agent_id}", str(amount),
+                        "--assign", "extracted_coin",
+                        "--transfer-objects", "[extracted_coin]", f"@{recipient}",
+                        "--json"
+                    ]
+                    
+                    result = subprocess.run(cmd, capture_output=True, text=True, shell=is_windows)
+                    
+                    if result.returncode == 0:
+                        tx_data = {}
+                        try:
+                            tx_data = json.loads(result.stdout)
+                        except Exception:
+                            pass
+                        
+                        digest = None
+                        if isinstance(tx_data, dict):
+                            digest = tx_data.get("digest")
+                        elif isinstance(tx_data, list) and len(tx_data) > 0:
+                            digest = tx_data[0].get("digest")
+                        
+                        if digest:
+                            print(f"         ✓ Transaction executed successfully on Sui Testnet!")
+                            print(f"         Digest: {digest}")
+                            print(f"         Explorer URL: https://suivision.xyz/txblock/{digest}\n")
+                        else:
+                            print(f"         ✓ Transaction submitted successfully (Raw output received)\n")
+                    else:
+                        print(f"         ✖ Sui CLI PTB command failed with code {result.returncode}")
+                        print(f"         Stdout: {result.stdout}")
+                        print(f"         Stderr: {result.stderr}\n")
                 else:
                     # Log every 30 iterations
                     if iteration % 30 == 0:

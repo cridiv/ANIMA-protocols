@@ -47,5 +47,10 @@ public fun extract_funds_for_action(
     assert!(agent_balance_mut.value() >= amount, EInsufficientFundsAllocation);
 
     // 5. Slice out the specific token amount and return it as a concrete Coin resource
-    coin::take(agent_balance_mut, amount, ctx)
+    let extracted_coin = coin::take(agent_balance_mut, amount, ctx);
+    
+    // 6. Record action to increment reputation and emit event on-chain
+    protocol::record_action(agent, &extracted_coin);
+    
+    extracted_coin
 }

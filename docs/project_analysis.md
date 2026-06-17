@@ -33,7 +33,7 @@ graph TD
 ---
 
 ## 2. On-Chain Contracts (`contracts/`)
-Located at [contracts/sources](file:///c:/Users/PC/Desktop/Coding/ANIMA-protocol/contracts/sources). Deployed on Sui Testnet under Package ID: `0x63b6429339342dd64edd48c56420983c1dd37b4d8e573123e051a4cf52a092a1`.
+Located at [contracts/sources](file:///c:/Users/PC/Desktop/Coding/ANIMA-protocol/contracts/sources). Deployed on Sui Testnet under Package ID: `0x5f6681ebeff7b6a1a1f333ba20842d47ed822f39e3ca9d06de3a69f2282e6eca`.
 
 ### Core Data Models
 *   **`ANIMA`**: The agent's identity object. Tracks state variables:
