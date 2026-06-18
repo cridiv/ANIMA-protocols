@@ -2,10 +2,16 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ExternalLink, Menu, X } from "lucide-react";
-import { ConnectButton } from "@mysten/dapp-kit";
+import { ExternalLink, Menu, X, LogOut } from "lucide-react";
+import {
+  ConnectButton,
+  useCurrentAccount,
+  useDisconnectWallet,
+} from "@mysten/dapp-kit";
 
 const Navbar = () => {
+  const currentAccount = useCurrentAccount();
+  const { mutate: disconnect } = useDisconnectWallet();
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -124,12 +130,14 @@ const Navbar = () => {
             </div>
 
             <div className="group !leading-1.4 text-base relative">
-              <Link
-                href="explorer"
-                className="h-full flex hover:text-[#0241ff] cursor-pointer tracking-[-0.03em] whitespace-nowrap md:text-sm lg:text-base transition-colors"
+              <a
+                href="https://explorer.animasui.xyz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="h-full flex items-center hover:text-[#0241ff] cursor-pointer tracking-[-0.03em] whitespace-nowrap md:text-sm lg:text-base transition-colors"
               >
                 Explorer <ExternalLink className="w-4 h-4 ml-1" />
-              </Link>
+              </a>
             </div>
           </div>
 
@@ -137,56 +145,67 @@ const Navbar = () => {
           <div className="flex items-center gap-2">
             <div className="flex items-center px-1 rounded-full bg-gray-50 gap-1 border border-gray-200">
               <Link
-                href="#"
-                className="w-10 h-10 flex items-center justify-center relative group cursor-pointer hover:bg-gray-200 rounded-full transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://x.com"
+                className="w-10 h-10 flex items-center justify-center relative group cursor-pointer hover:bg-gray-200 rounded-full transition-colors text-gray-700 hover:text-black"
               >
                 <svg
-                  className="w-5 h-5"
-                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-4 h-4"
+                  fill="currentColor"
                   viewBox="0 0 24 24"
-                  fill="none"
+                  aria-hidden="true"
                 >
-                  <path
-                    stroke="currentColor"
-                    strokeLinejoin="round"
-                    strokeWidth="1.2"
-                    d="M8.5 8h10m-10 3h10m-10 3h10M7.834 21.749l3.596-3.236A2 2 0 0 1 12.768 18H20a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2a1 1 0 0 1 1 1v2.377a.5.5 0 0 0 .834.372ZM6 8.5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm0 3a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm0 3a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Z"
-                    clipRule="evenodd"
-                  />
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                 </svg>
                 <span className="absolute bottom-[-20px] left-1/2 text-xs bg-gray-900 text-white px-2 py-1 rounded whitespace-nowrap -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  Feedback
+                  Follow on X
                 </span>
               </Link>
 
               <Link
                 target="_blank"
                 rel="noopener noreferrer"
-                href="https://discord.com"
-                className="w-10 h-10 flex items-center justify-center relative group cursor-pointer hover:bg-gray-200 rounded-full transition-colors"
+                href="https://github.com"
+                className="w-10 h-10 flex items-center justify-center relative group cursor-pointer hover:bg-gray-200 rounded-full transition-colors text-gray-700 hover:text-black"
               >
                 <svg
                   className="w-5 h-5"
-                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
                   viewBox="0 0 24 24"
-                  fill="none"
+                  aria-hidden="true"
                 >
                   <path
-                    stroke="currentColor"
-                    strokeLinejoin="round"
-                    strokeWidth="1.2"
-                    d="M19.345 5.344A17.4 17.4 0 0 0 14.982 4c-.192.33-.405.779-.555 1.13a16.7 16.7 0 0 0-4.833 0c-.15-.351-.373-.8-.555-1.13a17.2 17.2 0 0 0-4.363 1.344c-2.763 4.075-3.51 8.053-3.136 11.979A17.8 17.8 0 0 0 6.885 20a13 13 0 0 0 1.141-1.845 11 11 0 0 1-1.803-.864c.15-.107.3-.224.438-.342 3.477 1.59 7.244 1.59 10.678 0 .15.118.288.235.438.342a11 11 0 0 1-1.803.864A13 13 0 0 0 17.115 20a17.7 17.7 0 0 0 5.345-2.677c.459-4.544-.726-8.491-3.116-11.979ZM6.607 12.789c0 1.163.854 2.112 1.9 2.112 1.055 0 1.898-.949 1.898-2.112.021-1.162-.843-2.112-1.899-2.112-1.067 0-1.899.95-1.899 2.112Zm7.008 0c0 1.163.855 2.112 1.9 2.112 1.067 0 1.899-.949 1.899-2.112.021-1.162-.843-2.112-1.899-2.112-1.067 0-1.9.95-1.9 2.112Z"
+                    fillRule="evenodd"
+                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
                     clipRule="evenodd"
                   />
                 </svg>
                 <span className="absolute bottom-[-20px] left-1/2 text-xs bg-gray-900 text-white px-2 py-1 rounded whitespace-nowrap -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  Join Discord
+                  GitHub
                 </span>
               </Link>
             </div>
 
             {/* CTA Button */}
-            <ConnectButton className="w-full primary-button inline-flex items-center justify-center gap-2 !rounded-full cursor-pointer hover:scale-95 px-5 py-3 text-sm font-medium !text-white transition-all hover:shadow-lg mt-2" />
+            {currentAccount ? (
+              <div className="flex items-center gap-2 bg-[#0241ff]/5 border border-[#0241ff]/15 rounded-full px-4 py-1.5 shadow-sm font-mono shrink-0">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span className="text-xs text-[#0241ff] font-medium">
+                  {currentAccount.address.slice(0, 6)}...
+                  {currentAccount.address.slice(-4)}
+                </span>
+                <button
+                  onClick={() => disconnect()}
+                  className="p-1 hover:bg-[#0241ff]/10 rounded-full text-zinc-400 hover:text-red-500 transition-all cursor-pointer shrink-0"
+                  title="Disconnect Wallet"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <ConnectButton className="w-full primary-button inline-flex items-center justify-center gap-2 !rounded-full cursor-pointer hover:scale-95 px-5 py-3 text-sm font-medium !text-white transition-all hover:shadow-lg mt-2" />
+            )}
           </div>
         </div>
       </header>
@@ -301,25 +320,55 @@ const Navbar = () => {
               Mint Agents
             </Link>
 
-            <Link
-              href="explorer"
+            <a
+              href="https://explorer.animasui.xyz"
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={() => setIsMobileMenuOpen(false)}
               className="px-4 py-3 text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2 border-b border-gray-200"
             >
               Explorer <ExternalLink className="w-4 h-4" />
-            </Link>
+            </a>
 
             <a
               target="_blank"
               rel="noopener noreferrer"
-              href="https://discord.com"
+              href="https://x.com"
               className="px-4 py-3 text-sm font-medium hover:bg-gray-50 transition-colors border-b border-gray-200"
             >
-              Discord
+              X (Twitter)
+            </a>
+
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              href="https://github.com"
+              className="px-4 py-3 text-sm font-medium hover:bg-gray-50 transition-colors border-b border-gray-200"
+            >
+              GitHub
             </a>
 
             <div className="px-4 py-3">
-              <ConnectButton className="w-full primary-button inline-flex items-center justify-center gap-2 rounded-full cursor-pointer hover:scale-95 px-4 py-2 text-sm font-medium text-white transition-all hover:shadow-lg" />
+              {currentAccount ? (
+                <div className="flex items-center justify-between bg-[#0241ff]/5 border border-[#0241ff]/15 rounded-full px-4 py-2 shadow-sm font-mono">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-xs text-[#0241ff] font-medium">
+                      {currentAccount.address.slice(0, 6)}...
+                      {currentAccount.address.slice(-4)}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => disconnect()}
+                    className="p-1.5 hover:bg-[#0241ff]/10 rounded-full text-zinc-400 hover:text-red-500 transition-all cursor-pointer"
+                    title="Disconnect Wallet"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <ConnectButton className="w-full primary-button inline-flex items-center justify-center gap-2 rounded-full cursor-pointer hover:scale-95 px-4 py-2 text-sm font-medium text-white transition-all hover:shadow-lg" />
+              )}
             </div>
           </div>
         </div>
