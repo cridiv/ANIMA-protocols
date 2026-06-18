@@ -157,7 +157,7 @@ export async function handleAnimaMinted(client: SuiClient, event: any) {
       console.error(`Error inserting minted agent ${anima_id} to Supabase:`, error);
     } else {
       console.log(`Successfully indexed agent ${agentName} (${anima_id}) in Supabase`);
-      
+
       // Log initial MINT action
       await supabase.from("agent_actions").insert({
         agent_object_id: anima_id,
@@ -193,14 +193,17 @@ export async function handleAgentActionExecuted(client: SuiClient, event: any) {
       options: { showInput: true },
     });
 
-    const txCommands = txBlock.transaction?.data?.transaction?.transactions || [];
-    for (const cmd of txCommands) {
-      if (cmd.MoveCall) {
-        const { module: mod, function: func } = cmd.MoveCall;
-        if (mod === "wallet" && (func === "extract_funds_for_action" || func === "deposit_funds")) {
-          actionType = "TRANSFER";
-          targetProtocol = "Sui Network";
-          break;
+    const transaction = txBlock.transaction?.data?.transaction;
+    if (transaction && transaction.kind === "ProgrammableTransaction") {
+      const txCommands = transaction.transactions || [];
+      for (const cmd of txCommands) {
+        if ("MoveCall" in cmd && cmd.MoveCall) {
+          const { module: mod, function: func } = cmd.MoveCall;
+          if (mod === "wallet" && (func === "extract_funds_for_action" || func === "deposit_funds")) {
+            actionType = "TRANSFER";
+            targetProtocol = "Sui Network";
+            break;
+          }
         }
       }
     }
