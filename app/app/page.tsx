@@ -7,6 +7,7 @@ import ProblemAndSolution from "./components/ProblemAndSolution";
 import InteractiveNfaCore from "./components/InteractiveNfaCore";
 import HowToUse from "./components/HowToUse";
 import CallToAction from "./components/CallToAction";
+import Faqs from "./components/Faqs";
 
 export default function Home() {
   return (
@@ -43,9 +44,10 @@ export default function Home() {
       <div className="relative z-0">
         <IntroducingNFA />
         <ProblemAndSolution />
-        <InteractiveNfaCore />
+        {/* <InteractiveNfaCore /> */}
         <HowToUse />
         <CallToAction />
+        <Faqs />
       </div>
 
       <Footer />

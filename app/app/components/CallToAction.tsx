@@ -36,11 +36,11 @@ export default function CallToAction() {
       className="w-full bg-[#f8f8f8] pb-24 md:pb-32 relative overflow-hidden"
       id="cta"
     >
-      <div className="w-[90%] mx-auto px-4 md:px-2 relative z-10">
+      <div className="w-[100%] mx-auto px-4 md:px-8 relative z-10">
         {/* Main CTA Card */}
         <div className="relative overflow-hidden bg-[#0241ff] rounded-3xl text-white shadow-xl border border-[#0241ff]/20">
           {/* Safe visual background elements: abstract glows and soft shapes */}
-          <div className="absolute inset-0 pointer-events-none z-0">
+          <div className="absolute w-full inset-0 pointer-events-none z-0">
             <Aurora
               colorStops={["#000080", "#000080", "#000080"]}
               blend={0.88}
@@ -154,7 +154,7 @@ export default function CallToAction() {
                   </div>
                   <div>
                     <h4 className="text-sm font-semibold text-white mb-1 flex items-center gap-1 group-hover:text-blue-200 transition-colors">
-                      On-Chain Ledger
+                      ANIMA Explorer
                       <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                     </h4>
                     <p className="text-xs text-white/60 font-light leading-relaxed">

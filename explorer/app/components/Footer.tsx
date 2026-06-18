@@ -1,232 +1,94 @@
-"use client";
-
 import React from "react";
+import Link from "next/link";
+import { Mail, ExternalLink } from "lucide-react";
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
-
-  const navigationLinks = [
-    { label: "Home", href: "https://example.com/", external: true },
-    { label: "Blog", href: "https://example.com/blog", external: true },
-    {
-      label: "X",
-      href: "https://example.com/whitepaper",
-      external: true,
-    },
-    { label: "Docs", href: "https://example.com/docs", external: true },
-    { label: "GitHub", href: "https://github.com", external: true },
-  ];
-
-  //   {
-  //     label: "Discord",
-  //     href: "https://discord.gg",
-  //     icon: (
-  //       <svg
-  //         xmlns="http://www.w3.org/2000/svg"
-  //         width="1em"
-  //         height="1em"
-  //         fill="none"
-  //         viewBox="0 0 24 24"
-  //       >
-  //         <path
-  //           fill="currentColor"
-  //           d="M20.317 4.493c-1.53-.69-3.17-1.2-4.885-1.49a.075.075 0 0 0-.079.036c-.21.369-.444.85-.607 1.23a18.566 18.566 0 0 0-5.488 0 12.358 12.358 0 0 0-.617-1.23.077.077 0 0 0-.079-.038c-1.714.29-3.354.8-4.885 1.491a.07.07 0 0 0-.032.027C.533 9.094-.32 13.556.1 17.962a.08.08 0 0 0 .031.055 20.031 20.031 0 0 0 5.993 2.98.078.078 0 0 0 .084-.026c.463-.619.873-1.276 1.226-1.963a.074.074 0 0 0-.04-.104 13.211 13.211 0 0 1-1.873-.878.075.075 0 0 1-.008-.125c.126-.093.252-.19.372-.287a.076.076 0 0 1 .078-.01c3.927 1.764 8.18 1.764 12.061 0a.075.075 0 0 1 .08.009c.12.098.244.195.371.288a.075.075 0 0 1 .02.1.076.076 0 0 1-.026.025c-.598.344-1.22.635-1.872.877a.075.075 0 0 0-.041.105c.36.687.771 1.341 1.224 1.962a.078.078 0 0 0 .084.028 19.966 19.966 0 0 0 6.003-2.981.076.076 0 0 0 .032-.054c.5-5.094-.838-9.52-3.55-13.442a.06.06 0 0 0-.03-.028ZM8.02 15.279c-1.182 0-2.157-1.069-2.157-2.38 0-1.312.956-2.38 2.157-2.38 1.21 0 2.177 1.077 2.158 2.38 0 1.312-.957 2.38-2.158 2.38Zm7.976 0c-1.184 0-2.158-1.069-2.158-2.38 0-1.312.956-2.38 2.158-2.38 1.21 0 2.176 1.077 2.156 2.38 0 1.312-.946 2.38-2.157 2.38Z"
-  //         ></path>
-  //       </svg>
-  //     ),
-  //   },
-  //   {
-  //     label: "Twitter",
-  //     href: "https://twitter.com",
-  //     icon: (
-  //       <svg
-  //         xmlns="http://www.w3.org/2000/svg"
-  //         width="1em"
-  //         height="1em"
-  //         fill="none"
-  //         viewBox="0 0 24 24"
-  //       >
-  //         <path
-  //           fill="currentColor"
-  //           d="M7.548 21c9.056 0 14.01-6.926 14.01-12.932 0-.196 0-.392-.015-.587A9.63 9.63 0 0 0 24 5.128c-.899.368-1.852.609-2.828.715 1.028-.568 1.797-1.461 2.165-2.514-.967.53-2.024.903-3.127 1.104a5.068 5.068 0 0 0-2.794-1.373 5.288 5.288 0 0 0-3.122.478 4.72 4.72 0 0 0-2.163 2.133 4.229 4.229 0 0 0-.312 2.907 14.904 14.904 0 0 1-5.622-1.379A13.833 13.833 0 0 1 1.67 3.83c-.63 1-.822 2.185-.539 3.312.283 1.128 1.021 2.113 2.064 2.755A5.195 5.195 0 0 1 .96 9.327v.058c0 1.05.394 2.066 1.114 2.878A5.012 5.012 0 0 0 4.91 13.84a5.314 5.314 0 0 1-2.223.078 4.582 4.582 0 0 0 1.752 2.259c.825.566 1.82.88 2.848.898a10.21 10.21 0 0 1-3.44 1.611c-1.25.323-2.558.416-3.847.272C2.252 20.292 4.872 21 7.548 20.997"
-  //         ></path>
-  //       </svg>
-  //     ),
-  //   },
-  //   {
-  //     label: "LinkedIn",
-  //     href: "https://linkedin.com",
-  //     icon: (
-  //       <svg
-  //         xmlns="http://www.w3.org/2000/svg"
-  //         width="1em"
-  //         height="1em"
-  //         fill="none"
-  //         viewBox="0 0 24 24"
-  //       >
-  //         <path
-  //           fill="currentColor"
-  //           d="M19.62 2H4.38A2.38 2.38 0 0 0 2 4.38v15.24A2.38 2.38 0 0 0 4.38 22h15.24A2.38 2.38 0 0 0 22 19.62V4.38A2.38 2.38 0 0 0 19.62 2ZM8.188 9.62v9.047H5.333V9.619H8.19ZM5.333 6.984c0-.666.571-1.177 1.428-1.177s1.395.51 1.428 1.177c0 .666-.533 1.204-1.428 1.204-.857 0-1.428-.538-1.428-1.204Zm13.334 11.682H15.81v-4.762c0-.952-.478-1.905-1.67-1.925h-.037c-1.151 0-1.629.983-1.629 1.925v4.762H9.62V9.619h2.856v1.22s.92-1.22 2.768-1.22c1.89 0 3.424 1.3 3.424 3.934v5.114Z"
-  //         ></path>
-  //       </svg>
-  //     ),
-  //   },
-  // ];
-
-  const legalLinks = [
-    { label: "Terms & Conditions", href: "https://example.com/terms" },
-    { label: "Privacy Policy", href: "https://example.com/privacy" },
-  ];
-
   return (
-    <footer className="bg-background px-5 py-10 md:px-10 md:py-14">
-      <nav className="flex flex-col justify-center gap-4 md:gap-7.5">
-        <div className="flex flex-col-reverse items-center gap-7.5 md:flex-row md:justify-between">
-          {/* Logo - Hidden on mobile */}
-          <div className="hidden self-center md:flex md:self-start">
-            {/* Logo and Brand */}
-            <a className="flex items-center" href="/">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="mr-2 h-6 w-6"
+    <footer className="w-full pb-6 md:pb-12 lg:pb-14 xl:pb-16">
+      <div className="container mx-auto">
+        <div className="w-full border-t text-white border-[#E9E9E9] pt-6 pb-2.5 md:pt-8 md:pb-3 lg:pt-9 lg:pb-4 xl:pt-10 xl:pb-5">
+          {/* Bottom Info Section */}
+          <div className="w-full flex justify-between font-rm text-[#6F6F6F] px-4 flex-col md:flex-row items-center gap-2 text-xs md:gap-3 md:text-sm">
+            <div className="flex items-center gap-2 md:gap-3 lg:gap-4">
+              <Link
+                href="/"
+                className="flex p-4 px-6 rounded-full backdrop-blur-md items-center gap-2 font-bold text-xl"
               >
-                <path
-                  d="M0 6C0 2.68629 2.68629 0 6 0H18C21.3137 0 24 2.68629 24 6V18C24 21.3137 21.3137 24 18 24H6C2.68629 24 0 21.3137 0 18V6Z"
-                  fill="#4DA2FF"
-                />
-
-                <path
-                  d="M12 6.5C10.5 4.2 7.2 4.2 5.5 6.2C3.2 8.8 4.5 13.2 12 18.5C19.5 13.2 20.8 8.8 18.5 6.2C16.8 4.2 13.5 4.2 12 6.5Z"
-                  stroke="white"
-                  strokeWidth="1.5"
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                />
-
-                <polygon
-                  points="6.5,8.5 17.5,8.5 16,11 12,12 8,11"
-                  fill="white"
-                />
-
-                <path
-                  d="M12 12V14.5M12 14.5L9.5 13.5M12 14.5L14.5 13.5M12 14.5V17"
-                  stroke="white"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                />
-
-                <circle cx="12" cy="14.5" r="1" fill="white" />
-                <circle cx="9.5" cy="13.5" r="0.8" fill="white" />
-                <circle cx="14.5" cy="13.5" r="0.8" fill="white" />
-                <circle cx="12" cy="17" r="0.8" fill="white" />
-              </svg>
-              <span className="font-bold text-lg">
-                Anima <span className="text-sm font-light">Explorer</span>
-              </span>
-            </a>
-          </div>
-
-          {/* Navigation Links and Social Media */}
-          <div>
-            <div className="flex flex-col items-center justify-center gap-6 md:flex-row md:justify-end">
-              {/* Main Navigation Links */}
-              <ul className="flex gap-4 md:flex-row md:gap-6">
-                {navigationLinks.map((link) => (
-                  <li key={link.label}>
-                    <a
-                      href={link.href}
-                      target={link.external ? "_blank" : undefined}
-                      rel={link.external ? "noreferrer noopener" : undefined}
-                      className="text-body font-semibold text-steel-dark hover:text-steel-darker active:text-steel transition-colors"
-                    >
-                      <div className="flex-nowrap items-center gap-2 inline-flex">
-                        <div className="break-words text-body font-medium text-steel-darker">
-                          {link.label}
-                        </div>
-                      </div>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Copyright and Legal Links */}
-        <div className="flex flex-col-reverse justify-center gap-3 pt-3 md:flex-row md:justify-between">
-          <div className="flex justify-center md:justify-start">
-            <div className="break-words text-sm font-sm text-steel-darker">
-              ©{currentYear} ANIMA Protocol. All rights reserved.
-            </div>
-          </div>
-
-          <ul className="flex flex-col gap-3 md:flex-row md:gap-8">
-            {legalLinks.map((link) => (
-              <li
-                key={link.label}
-                className="flex font-sm items-center justify-center"
-              >
-                <a
-                  href={link.href}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="text-body font-light text-steel-dark hover:text-steel-darker active:text-steel transition-colors"
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="mr-2 h-6 w-6"
                 >
-                  <div className="flex-nowrap items-center gap-2 inline-flex">
-                    <div className="break-words text-sm font-medium text-steel-darker">
-                      {link.label}
-                    </div>
-                  </div>
-                </a>
-              </li>
-            ))}
-          </ul>
+                  <path
+                    d="M0 6C0 2.68629 2.68629 0 6 0H18C21.3137 0 24 2.68629 24 6V18C24 21.3137 21.3137 24 18 24H6C2.68629 24 0 21.3137 0 18V6Z"
+                    fill="#4DA2FF"
+                  />
+
+                  <path
+                    d="M12 6.5C10.5 4.2 7.2 4.2 5.5 6.2C3.2 8.8 4.5 13.2 12 18.5C19.5 13.2 20.8 8.8 18.5 6.2C16.8 4.2 13.5 4.2 12 6.5Z"
+                    stroke="white"
+                    strokeWidth="1.5"
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                  />
+
+                  <polygon
+                    points="6.5,8.5 17.5,8.5 16,11 12,12 8,11"
+                    fill="white"
+                  />
+
+                  <path
+                    d="M12 12V14.5M12 14.5L9.5 13.5M12 14.5L14.5 13.5M12 14.5V17"
+                    stroke="white"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                  />
+
+                  <circle cx="12" cy="14.5" r="1" fill="white" />
+                  <circle cx="9.5" cy="13.5" r="0.8" fill="white" />
+                  <circle cx="14.5" cy="13.5" r="0.8" fill="white" />
+                  <circle cx="12" cy="17" r="0.8" fill="white" />
+                </svg>
+
+                <span className="font-bold text-lg">
+                  Anima <span className="text-sm font-light">Sui</span>
+                </span>
+              </Link>
+
+              <span>© ANIMA Protocol.</span>
+              <span>2026</span>
+              <span>All Rights Reserved</span>
+            </div>
+
+            <div className="flex items-center gap-2 md:gap-5">
+              <a
+                href="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cursor-pointer text-[10px] md:text-xs text-center hover:text-[#0241ff] transition-colors"
+              >
+                Terms of Service
+              </a>
+              <a
+                href="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cursor-pointer text-[10px] md:text-xs text-center hover:text-[#0241ff] transition-colors"
+              >
+                Privacy Policy
+              </a>
+              <a
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cursor-pointer text-[10px] md:text-xs text-center hover:text-[#0241ff] transition-colors"
+              >
+                License
+              </a>
+            </div>
+          </div>
         </div>
-      </nav>
-
-      {/* Mobile Logo */}
-      <div className="mt-4 flex justify-center border-t border-solid border-gray-45 pt-5 md:hidden">
-        {/* Logo and Brand */}
-        <a className="flex items-center" href="/">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="mr-2 h-6 w-6"
-          >
-            <path
-              d="M0 6C0 2.68629 2.68629 0 6 0H18C21.3137 0 24 2.68629 24 6V18C24 21.3137 21.3137 24 18 24H6C2.68629 24 0 21.3137 0 18V6Z"
-              fill="#4DA2FF"
-            />
-
-            <path
-              d="M12 6.5C10.5 4.2 7.2 4.2 5.5 6.2C3.2 8.8 4.5 13.2 12 18.5C19.5 13.2 20.8 8.8 18.5 6.2C16.8 4.2 13.5 4.2 12 6.5Z"
-              stroke="white"
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
-
-            <polygon points="6.5,8.5 17.5,8.5 16,11 12,12 8,11" fill="white" />
-
-            <path
-              d="M12 12V14.5M12 14.5L9.5 13.5M12 14.5L14.5 13.5M12 14.5V17"
-              stroke="white"
-              strokeWidth="1.2"
-              strokeLinecap="round"
-            />
-
-            <circle cx="12" cy="14.5" r="1" fill="white" />
-            <circle cx="9.5" cy="13.5" r="0.8" fill="white" />
-            <circle cx="14.5" cy="13.5" r="0.8" fill="white" />
-            <circle cx="12" cy="17" r="0.8" fill="white" />
-          </svg>
-          <span className="font-bold text-lg">
-            Anima <span className="text-sm font-light">Explorer</span>
-          </span>
-        </a>
       </div>
     </footer>
   );

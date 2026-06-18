@@ -81,8 +81,8 @@ const steps: Step[] = [
     description:
       "Deposit initial gas (SUI) and operational capital into the NFA's self-contained balance vault. The agent is now fully initialized, funded, and authorized to execute actions on-chain. The human owner retains the OwnerCap to pause the agent or drain the vault at any moment.",
     linkText: "View Agents Live on explorer",
-    linkHref: "#", // Smooth scroll down or to explorer index
-    isExternal: false,
+    linkHref: "https://explorer.animasui.xyz",
+    isExternal: true,
     actionIcon: ArrowUpRight,
   },
 ];
